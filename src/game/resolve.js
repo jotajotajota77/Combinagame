@@ -54,9 +54,11 @@ export function triggerSpecial(board, r, c, ctx, rng, clearSet, recolorMap, effe
     }
     case SPECIAL.BOMB: {
       const target = ctx.bombColor != null ? ctx.bombColor : randomPresentColor(board, null, rng)
-      colorCells(board, target).forEach(add)
+      const hits = colorCells(board, target)
+      hits.forEach(add)
       add({ r, c })
-      effects.push({ kind: 'bomb', color: target, r, c })
+      // raios saindo da gema em direção a cada peça da cor alvo
+      effects.push({ kind: 'bomb', color: target, r, c, targets: hits })
       break
     }
     case SPECIAL.FISH: {
@@ -71,12 +73,17 @@ export function triggerSpecial(board, r, c, ctx, rng, clearSet, recolorMap, effe
       const toColor = gem.color
       const fromColor =
         ctx.convertFrom != null ? ctx.convertFrom : randomPresentColor(board, toColor, rng)
+      const painted = []
       for (const cell of colorCells(board, fromColor)) {
         const k = key(cell.r, cell.c)
-        if (!clearSet.has(k) && !protectedSet.has(k)) recolorMap.set(k, toColor)
+        if (!clearSet.has(k) && !protectedSet.has(k)) {
+          recolorMap.set(k, toColor)
+          painted.push(cell)
+        }
       }
       add({ r, c })
-      effects.push({ kind: 'coco', from: fromColor, to: toColor, r, c })
+      // gotas de tinta indo da roda até cada peça convertida
+      effects.push({ kind: 'coco', from: fromColor, to: toColor, r, c, targets: painted })
       break
     }
     default:
@@ -250,9 +257,10 @@ export function handleSwapActivation(board, p1, p2, rng) {
     addClear(bombPos)
     if (!other.special || other.special === SPECIAL.COCO) {
       // bomba + normal (ou coco): limpa toda a cor do parceiro
-      colorCells(board, other.color).forEach(addClear)
+      const hits = colorCells(board, other.color)
+      hits.forEach(addClear)
       addClear(otherPos)
-      effects.push({ kind: 'bomb', color: other.color, r: bombPos.r, c: bombPos.c })
+      effects.push({ kind: 'bomb', color: other.color, r: bombPos.r, c: bombPos.c, targets: hits })
     } else {
       // bomba + especial: converte toda a cor naquele especial e ativa todos
       addClear(otherPos)
@@ -280,9 +288,13 @@ export function handleSwapActivation(board, p1, p2, rng) {
     const toColor = coco.color
     const fromColor = other.color
     addClear(cocoPos)
+    const painted = []
     for (const cell of colorCells(board, fromColor)) {
       const k = key(cell.r, cell.c)
-      if (k !== key(cocoPos.r, cocoPos.c)) recolorMap.set(k, toColor)
+      if (k !== key(cocoPos.r, cocoPos.c)) {
+        recolorMap.set(k, toColor)
+        painted.push(cell)
+      }
     }
     if (other.special && other.special !== SPECIAL.COCO) {
       // após converter, dispara o especial parceiro
@@ -290,7 +302,7 @@ export function handleSwapActivation(board, p1, p2, rng) {
     } else if (other.special === SPECIAL.COCO) {
       addClear(otherPos)
     }
-    effects.push({ kind: 'coco', from: fromColor, to: toColor, r: cocoPos.r, c: cocoPos.c })
+    effects.push({ kind: 'coco', from: fromColor, to: toColor, r: cocoPos.r, c: cocoPos.c, targets: painted })
     return { clearSet, recolorMap, effects, extraSeeds, upgrades }
   }
 

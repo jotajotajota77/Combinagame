@@ -175,27 +175,38 @@ function detectSquare(set) {
   return null
 }
 
-// Classificação da forma → gema especial. Ver plano para precedência.
-// Interseção (cruzamento H+V): >=6 células → coco; ==5 → embrulhada.
-// Linha reta: >=5 → bomba; ==4 → listrada; ==3 → normal.
-// Quadrado 2x2 puro → peixe.
+// Classificação da forma → gema especial. Precedência (do mais forte ao mais fraco):
+// - roda de coco (5): contém uma linha reta de 5 (1x5/5x1) MAIS pelo menos uma célula
+//   extra ao lado (T com pernas). Ou seja: run >= 5 e total > tamanho do run.
+// - bomba (4): linha reta de 5+ sem ramificação (o total é o próprio run).
+// - peixe (1): qualquer forma que contenha um quadrado 2x2 e não se enquadre acima.
+// - embrulhada (3): interseção em L/T (runs H e V >= 3 se cruzando), sem 2x2.
+// - listrada (2): linha reta de 4.
+// - senão: match normal (3).
 function classifyGroup(board, cells, prefSet) {
   const m = measure(board, cells)
   let special = null
   let dir = null
   let origin = null
 
-  if (m.cross) {
-    origin = m.cross
-    special = m.size >= 6 ? SPECIAL.COCO : SPECIAL.WRAPPED
-  } else if (m.maxH >= 5 || m.maxV >= 5) {
+  const longest = Math.max(m.maxH, m.maxV)
+  const hasFive = longest >= 5
+
+  if (hasFive && m.size > longest) {
+    // linha de 5 com pelo menos uma célula extra ao lado → roda de coco
+    special = SPECIAL.COCO
+    origin = m.cross || null
+  } else if (hasFive) {
     special = SPECIAL.BOMB
+  } else if (m.isSquare) {
+    special = SPECIAL.FISH
+    origin = m.isSquare
+  } else if (m.cross) {
+    special = SPECIAL.WRAPPED
+    origin = m.cross
   } else if (m.maxH === 4 || m.maxV === 4) {
     special = SPECIAL.STRIPED
     dir = m.maxH === 4 ? DIR.ROW : DIR.COL
-  } else if (m.isSquare && m.maxH < 3 && m.maxV < 3) {
-    special = SPECIAL.FISH
-    origin = m.isSquare
   }
   // senão: match normal (sem especial)
 

@@ -53,19 +53,26 @@ describe('classificação de formas', () => {
     expect(specials(b)).toContain(SPECIAL.WRAPPED)
   })
 
-  it('T grande de 6+ células → roda de coco (gema 5)', () => {
-    // horizontal r2 c0-2 (3) + vertical c1 r0-3 (4), cruzando em (2,1) → 6 células.
+  it('T com braço de 5 (linha de 5 + perna) → roda de coco (gema 5)', () => {
+    // horizontal r2 c0-4 (5) + perna vertical c2 r3-4, cruzando em (2,2) → 7 células.
     const b = makeBoard({
-      '0,1': 0,
-      '1,1': 0,
-      '2,1': 0,
-      '3,1': 0,
       '2,0': 0,
+      '2,1': 0,
       '2,2': 0,
-      '4,1': 5,
-      '2,3': 5,
+      '2,3': 0,
+      '2,4': 0,
+      '3,2': 0,
+      '4,2': 0,
+      '5,2': 1, // impede que a perna vire uma linha de 5 vertical
     })
     expect(specials(b)).toContain(SPECIAL.COCO)
+  })
+
+  it('linha de 5 sem ramificação → bomba (não coco)', () => {
+    const b = makeBoard({ '2,0': 0, '2,1': 0, '2,2': 0, '2,3': 0, '2,4': 0, '2,5': 4, '1,0': 2 })
+    const s = specials(b)
+    expect(s).toContain(SPECIAL.BOMB)
+    expect(s).not.toContain(SPECIAL.COCO)
   })
 
   it('quadrado 2x2 → peixe (gema 1)', () => {
@@ -73,5 +80,11 @@ describe('classificação de formas', () => {
     const groups = findMatchGroups(b)
     expect(groups).toHaveLength(1)
     expect(groups[0].special).toBe(SPECIAL.FISH)
+  })
+
+  it('forma que contém um 2x2 (mesmo com linha de 4) → peixe', () => {
+    // linha r0 c0-3 (4) + (1,0),(1,1) formam um 2x2 → deve virar peixe, não listrada.
+    const b = makeBoard({ '0,0': 0, '0,1': 0, '0,2': 0, '0,3': 0, '1,0': 0, '1,1': 0, '0,4': 4 })
+    expect(specials(b)).toContain(SPECIAL.FISH)
   })
 })

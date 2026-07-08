@@ -405,6 +405,47 @@ body {
   animation: burst 0.4s ease-out forwards;
 }
 
+/* Raio da bomba de cor: linha que cresce da gema até o alvo. */
+.ray {
+  position: absolute;
+  height: 4px;
+  margin-top: -2px;
+  transform-origin: left center;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(180, 160, 255, 0.7));
+  box-shadow: 0 0 8px rgba(200, 180, 255, 0.9);
+  animation: ray-grow 0.34s ease-out forwards;
+}
+
+/* Sprite que viaja de uma célula a outra (peixe / gota de tinta). */
+.travel {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: 7;
+  animation: travel 0.42s ease-in-out forwards;
+}
+.travel-inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  display: block;
+}
+.fish-body {
+  display: block;
+  font-size: min(6vw, 26px);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+.drop-dot {
+  display: block;
+  width: min(4vw, 18px);
+  height: min(4vw, 18px);
+  border-radius: 50%;
+  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.35), 0 0 10px rgba(255, 255, 255, 0.5);
+  background: radial-gradient(120% 120% at 30% 25%, var(--a, #fff), var(--b, #888) 70%);
+}
+
 /* ---------------- Toast + footer ---------------- */
 .toast {
   position: absolute;
@@ -430,6 +471,17 @@ body {
 }
 
 /* ---------------- Keyframes ---------------- */
+@keyframes travel {
+  0% { left: var(--fl); top: var(--ft); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { left: var(--tl); top: var(--tt); opacity: 0.9; }
+}
+@keyframes ray-grow {
+  0% { transform: rotate(var(--rot, 0deg)) scaleX(0); opacity: 0; }
+  35% { opacity: 1; }
+  100% { transform: rotate(var(--rot, 0deg)) scaleX(1); opacity: 0; }
+}
 @keyframes drop-in {
   from { transform: translateY(-140%); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }

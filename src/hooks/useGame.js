@@ -74,7 +74,11 @@ export function useGame() {
           if (hasSpecial) playSpecial()
           else playMatch(clears - 1)
           if (clears >= 2) setCombo(clears)
-          await delay(T.CLEAR)
+          // Efeitos com animação de viagem (peixe/raios/gotas) precisam de mais tempo.
+          const slow = step.effects.some((e) =>
+            ['fish', 'fish-combo', 'bomb', 'bomb-upgrade', 'bomb-board', 'coco'].includes(e.kind),
+          )
+          await delay(slow ? T.CLEAR + 320 : T.CLEAR)
           if (!mounted.current) return
           setPopping([])
           setEffects([])

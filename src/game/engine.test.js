@@ -127,6 +127,46 @@ describe('especiais — duplo-clique', () => {
     expect(bomb).toBeTruthy()
     expect(bomb.color).toBeGreaterThanOrEqual(0)
   })
+
+  it('o efeito da bomba inclui a lista de alvos (para os raios)', () => {
+    const b = makeBoard({ '3,3': { color: -1, special: SPECIAL.BOMB } })
+    const res = activateAt(b, 3, 3, seededRng(4))
+    const bomb = res.steps.flatMap((s) => s.effects || []).find((e) => e.kind === 'bomb')
+    expect(Array.isArray(bomb.targets)).toBe(true)
+    expect(bomb.targets.length).toBeGreaterThan(0)
+  })
+})
+
+describe('especiais disparam ao serem destruídos', () => {
+  it('bomba destruída por outro efeito é ativada (encadeamento)', () => {
+    // listrada horizontal em (3,3) limpa a linha 3; há uma bomba em (3,6) na mesma linha.
+    const b = makeBoard({
+      '3,3': { color: 0, special: SPECIAL.STRIPED, dir: DIR.ROW },
+      '3,6': { color: -1, special: SPECIAL.BOMB },
+    })
+    const res = activateAt(b, 3, 3, seededRng(8))
+    expect(res.valid).toBe(true)
+    const effects = res.steps.flatMap((s) => s.effects || [])
+    expect(effects.some((e) => e.kind === 'stripe')).toBe(true)
+    // a bomba pega no feixe deve disparar também
+    expect(effects.some((e) => e.kind === 'bomb')).toBe(true)
+  })
+
+  it('especial com cor dentro de uma combinação é ativado antes de sumir', () => {
+    // (0,0),(0,1)=0 e uma listrada cor 0 em (1,2); trocar (0,2)<->(1,2) forma 0,0,listrada.
+    const b = makeBoard({
+      '0,0': 0,
+      '0,1': 0,
+      '0,2': 4,
+      '1,2': { color: 0, special: SPECIAL.STRIPED, dir: DIR.ROW },
+      '0,3': 3,
+      '1,0': 2,
+    })
+    const res = resolveMove(b, { r: 0, c: 2 }, { r: 1, c: 2 }, seededRng(6))
+    expect(res.valid).toBe(true)
+    const effects = res.steps.flatMap((s) => s.effects || [])
+    expect(effects.some((e) => e.kind === 'stripe')).toBe(true)
+  })
 })
 
 describe('gravidade', () => {

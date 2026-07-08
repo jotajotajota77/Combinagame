@@ -32,9 +32,9 @@ export default function App() {
         </div>
 
         <footer className="hints">
-          Arraste ou toque em duas peças vizinhas para trocar. Faça 4, 5, formas em L/T ou
-          quadrados 2×2 para criar especiais — e dê <strong>duplo-clique</strong> num especial para
-          ativá-lo.
+          Arraste uma peça numa direção (ou toque em duas vizinhas) para trocar. Faça 4, 5, formas
+          em L/T ou quadrados 2×2 para criar especiais — e dê <strong>duplo-clique</strong> num
+          especial para ativá-lo.
         </footer>
       </main>
     </div>

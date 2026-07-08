@@ -6,7 +6,8 @@ satisfatórias — cascatas infinitas, do seu jeito e no seu ritmo.
 
 ## Como jogar
 
-- **Arraste** (ou **toque em duas peças vizinhas**) para trocá-las de lugar.
+- **Arraste numa direção** (swipe) para trocar uma peça com a vizinha — ou toque em duas peças
+  vizinhas.
 - Combine **3 ou mais** peças da mesma cor para removê-las.
 - Formas maiores criam **gemas especiais** (veja abaixo).
 - **Duplo-clique** numa gema especial para ativá-la sem precisar trocar.
@@ -19,14 +20,16 @@ O contador de "peças combinadas" e os _combos_ são só um agrado visual: não 
 | Como criar | Gema | Efeito |
 |---|---|---|
 | 4 em linha | **Listrada** | limpa a linha ou a coluna inteira |
-| Forma em **T / L** (5 peças) | **Embrulhada** | explode uma área 3×3 |
-| **Quadrado 2×2** | **Peixe** 🐟 | nada até peças especiais/alvos e as explode |
-| **5 em linha** | **Bomba de cor** | remove todas as peças da cor com que é misturada |
-| **T grande** (6+ peças) | **Roda de coco** | tem cor própria; converte para a sua cor todas as peças da cor misturada |
+| Forma em **T / L** (5 peças, sem 2×2) | **Embrulhada** | explode uma área 3×3 |
+| Qualquer forma que contenha um **2×2** | **Peixe** 🐟 | peixes nadam pela tela até os alvos e os explodem |
+| **5 em linha** reta | **Bomba de cor** | dispara raios até todas as peças da cor misturada e as destrói |
+| **Linha de 5 + perna** (T com braço de 5) | **Roda de coco** | tem cor própria; lança gotas de tinta que pintam todas as peças da cor misturada com a cor dela |
 
-Os **combos entre especiais** seguem o Candy Crush clássico (listrada+listrada, bomba+bomba
-limpando o tabuleiro, bomba+especial "promovendo" toda uma cor, etc.). A bomba de cor e a roda de
-coco, quando ativadas por duplo-clique, escolhem uma **cor aleatória**.
+**Toda gema especial dispara ao ser destruída** — se um efeito atinge outra especial, ela também
+ativa (efeitos em cadeia). Os **combos entre especiais** seguem o Candy Crush clássico
+(listrada+listrada, bomba+bomba limpando o tabuleiro, bomba+especial "promovendo" toda uma cor,
+etc.). A bomba de cor e a roda de coco, quando ativadas por duplo-clique, escolhem uma
+**cor aleatória**.
 
 ## Rodando localmente
 
