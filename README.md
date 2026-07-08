@@ -45,11 +45,12 @@ npm run build    # build de produção em dist/
 
 ## Instalar no celular (PWA)
 
-O jogo é um **PWA instalável**: abra o site no navegador do celular e use
-**"Adicionar à tela inicial"** (Android/Chrome mostra o convite de instalação; no iPhone,
-Safari → Compartilhar → _Adicionar à Tela de Início_). Ele abre em tela cheia, com ícone próprio,
-e funciona **offline** depois da primeira visita (service worker em `public/sw.js` + manifest em
-`public/manifest.webmanifest`).
+O jogo é um **PWA instalável**: no Android/Chrome, uma **badge "📲 Instalar app"** aparece no
+próprio cabeçalho assim que o navegador libera o prompt de instalação — é só tocar nela
+(`src/pwaInstall.js` escuta o evento `beforeinstallprompt` e chama `.prompt()` nativo). No iPhone,
+Safari não suporta esse evento: use Compartilhar → _Adicionar à Tela de Início_. Ele abre em tela
+cheia, com ícone próprio, e funciona **offline** depois da primeira visita (service worker em
+`public/sw.js` + manifest em `public/manifest.webmanifest`).
 
 ## Deploy no GitHub Pages
 

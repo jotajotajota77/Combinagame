@@ -1,9 +1,22 @@
+import { useEffect, useState } from 'react'
 import Board from './components/Board.jsx'
 import Hud from './components/Hud.jsx'
 import { useGame } from './hooks/useGame.js'
+import { isStandaloneDisplay, watchInstallPrompt, promptInstall } from './pwaInstall.js'
 
 export default function App() {
   const game = useGame()
+  const [canInstall, setCanInstall] = useState(false)
+
+  useEffect(() => {
+    if (isStandaloneDisplay()) return
+    return watchInstallPrompt(setCanInstall)
+  }, [])
+
+  const handleInstall = async () => {
+    const accepted = await promptInstall()
+    if (accepted) setCanInstall(false)
+  }
 
   return (
     <div className="app">
@@ -17,6 +30,8 @@ export default function App() {
           onShuffle={game.shuffle}
           onHint={game.showHint}
           onColors={game.changeColors}
+          canInstall={canInstall}
+          onInstall={handleInstall}
         />
 
         <div className="board-wrap">

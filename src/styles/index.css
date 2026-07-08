@@ -128,6 +128,22 @@ body {
   animation: pop-in 0.3s ease;
 }
 
+.install-badge {
+  font: inherit;
+  font-weight: 800;
+  padding: 8px 16px;
+  border-radius: 999px;
+  color: #06210f;
+  background: linear-gradient(90deg, #7bf0e2, #6bb2ff);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 6px 18px rgba(110, 200, 255, 0.4);
+  cursor: pointer;
+  animation: pop-in 0.3s ease, badge-pulse 2.2s ease-in-out infinite;
+}
+.install-badge:active {
+  transform: scale(0.95);
+}
+
 .controls {
   grid-column: 1 / -1;
   display: flex;
@@ -525,6 +541,10 @@ body {
   from { transform: scale(0.6); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 6px 18px rgba(110, 200, 255, 0.4); }
+  50% { box-shadow: 0 6px 26px rgba(110, 200, 255, 0.75); }
+}
 @keyframes hint-pulse {
   0%, 100% { transform: scale(1); filter: brightness(1); }
   50% { transform: scale(1.12); filter: brightness(1.4); }
@@ -572,4 +592,5 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .tile { transition: none; }
   .gem, .gem.enter, .gem.pop, .fx { animation-duration: 0.01ms !important; }
+  .install-badge { animation: pop-in 0.01ms ease !important; }
 }

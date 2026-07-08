@@ -2,7 +2,17 @@ import { useState } from 'react'
 import { setSoundEnabled } from '../audio.js'
 
 // Cabeçalho e controles. Nada de tempo ou limite de movimentos — só feedback gentil.
-export default function Hud({ score, combo, numColors, onNewGame, onShuffle, onHint, onColors }) {
+export default function Hud({
+  score,
+  combo,
+  numColors,
+  onNewGame,
+  onShuffle,
+  onHint,
+  onColors,
+  canInstall,
+  onInstall,
+}) {
   const [sound, setSound] = useState(true)
 
   const toggleSound = () => {
@@ -24,6 +34,11 @@ export default function Hud({ score, combo, numColors, onNewGame, onShuffle, onH
           <span className="stat-value">{score.toLocaleString('pt-BR')}</span>
         </div>
         {combo > 1 && <div className="combo-badge">Combo ×{combo}!</div>}
+        {canInstall && (
+          <button type="button" className="install-badge" onClick={onInstall} title="Instalar o Combinagame">
+            📲 Instalar app
+          </button>
+        )}
       </div>
 
       <div className="controls">
