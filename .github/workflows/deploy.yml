@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, claude/casual-candy-crush-01x6oy]
   workflow_dispatch:
 
 permissions:
