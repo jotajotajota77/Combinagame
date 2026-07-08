@@ -1,7 +1,18 @@
 // Dimensões do tabuleiro e paleta de cores das gemas comuns.
 export const ROWS = 8
 export const COLS = 8
-export const NCOLORS = 6
+
+// Paleta máxima disponível (formas/cores 0..7). O jogador escolhe quantas usar.
+export const MIN_COLORS = 2
+export const MAX_COLORS = 8
+export const NCOLORS = MAX_COLORS
+
+// Número de cores em uso na partida atual (configurável pelo jogador, 2..8).
+export const config = { numColors: 6 }
+export function setNumColors(n) {
+  config.numColors = Math.max(MIN_COLORS, Math.min(MAX_COLORS, n | 0))
+  return config.numColors
+}
 
 // Cor sentinela para a bomba de cor (gema 4): nunca participa de matches comuns.
 export const BOMB_COLOR = -1

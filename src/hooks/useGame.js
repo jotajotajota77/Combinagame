@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createBoard } from '../game/board.js'
+import { config, setNumColors } from '../game/constants.js'
 import { resolveMove, activateAt } from '../game/engine.js'
 import { hasValidMove, reshuffle, findHint } from '../game/moves.js'
 import { playMatch, playSpecial } from '../audio.js'
@@ -21,6 +22,7 @@ export function useGame() {
   const [combo, setCombo] = useState(0)
   const [hint, setHint] = useState(null)
   const [toast, setToast] = useState(null)
+  const [numColors, setNumColorsState] = useState(config.numColors)
 
   const boardRef = useRef(board)
   const busyRef = useRef(false)
@@ -132,6 +134,20 @@ export function useGame() {
     flashToast('Tabuleiro novo 🍬')
   }, [commit, flashToast])
 
+  // Troca o número de cores (2..8) e começa um tabuleiro novo com elas.
+  const changeColors = useCallback(
+    (n) => {
+      if (busyRef.current) return
+      const applied = setNumColors(n)
+      setNumColorsState(applied)
+      commit(createBoard())
+      setScore(0)
+      setCombo(0)
+      flashToast(`${applied} cores 🎨`)
+    },
+    [commit, flashToast],
+  )
+
   const shuffle = useCallback(() => {
     if (busyRef.current) return
     commit(reshuffle(boardRef.current))
@@ -176,10 +192,12 @@ export function useGame() {
     combo,
     toast,
     hintKeys,
+    numColors,
     trySwap,
     activate,
     newGame,
     shuffle,
     showHint,
+    changeColors,
   }
 }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { setSoundEnabled } from '../audio.js'
 
 // Cabeçalho e controles. Nada de tempo ou limite de movimentos — só feedback gentil.
-export default function Hud({ score, combo, onNewGame, onShuffle, onHint }) {
+export default function Hud({ score, combo, numColors, onNewGame, onShuffle, onHint, onColors }) {
   const [sound, setSound] = useState(true)
 
   const toggleSound = () => {
@@ -36,6 +36,16 @@ export default function Hud({ score, combo, onNewGame, onShuffle, onHint }) {
         <button type="button" onClick={onNewGame} title="Começar um tabuleiro novo">
           🍬 Novo
         </button>
+        <label className="colors-picker" title="Quantas cores no jogo (2 a 8)">
+          🎨
+          <select value={numColors} onChange={(e) => onColors(Number(e.target.value))}>
+            {[2, 3, 4, 5, 6, 7, 8].map((n) => (
+              <option key={n} value={n}>
+                {n} cores
+              </option>
+            ))}
+          </select>
+        </label>
         <button type="button" onClick={toggleSound} title="Ligar/desligar som" className="icon">
           {sound ? '🔊' : '🔇'}
         </button>

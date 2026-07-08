@@ -7,13 +7,15 @@
   --text-dim: #b9a9e6;
   --radius: 18px;
 
-  /* Cores das gemas: [claro, escuro] por índice 0..5 */
-  --g0a: #ff6b7d; --g0b: #d61f3a;
+  /* Cores das gemas: [claro, escuro] por índice 0..7 */
+  --g0a: #ff8090; --g0b: #d61f3a;
   --g1a: #ffbb5c; --g1b: #e8850f;
-  --g2a: #ffe873; --g2b: #f0bf12;
-  --g3a: #67e0a8; --g3b: #14a06a;
+  --g2a: #ffe873; --g2b: #eab60a;
+  --g3a: #6fe6ab; --g3b: #12a069;
   --g4a: #6bb2ff; --g4b: #2f6fe0;
   --g5a: #c39bff; --g5b: #7a45d6;
+  --g6a: #ff9ed6; --g6b: #e0479f;
+  --g7a: #7bf0e2; --g7b: #14b3a6;
 }
 
 * {
@@ -205,9 +207,9 @@ body {
   z-index: 4;
 }
 .tile.selected .gem {
-  outline: 3px solid rgba(255, 255, 255, 0.85);
-  outline-offset: -3px;
-  transform: scale(1.06);
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 0.32em rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0.12em 0.16em rgba(0, 0, 0, 0.5));
 }
 .tile.hint .gem {
   animation: hint-pulse 0.9s ease-in-out infinite;
@@ -216,17 +218,25 @@ body {
 /* ---------------- Gems ---------------- */
 .gem {
   position: relative;
-  width: 84%;
-  height: 84%;
-  margin: 8%;
-  border-radius: 30% 30% 34% 34% / 32% 32% 30% 30%;
-  background: radial-gradient(120% 120% at 30% 25%, var(--a), var(--b) 70%);
-  box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.35), inset 0 3px 6px rgba(255, 255, 255, 0.5),
-    0 4px 8px rgba(0, 0, 0, 0.3);
+  width: 88%;
+  height: 88%;
+  margin: 6%;
+  background:
+    radial-gradient(135% 135% at 32% 26%, var(--a) 0%, var(--b) 66%, var(--b) 100%);
+  filter: drop-shadow(0 0.12em 0.16em rgba(0, 0, 0, 0.5));
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.18s ease;
+  transition: transform 0.18s ease, filter 0.18s ease;
+  clip-path: var(--shape, circle(50%));
+}
+/* sombra inferior interna → dá volume à gema, seguindo a forma (pintada atrás do conteúdo) */
+.gem::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 55% at 50% 112%, rgba(0, 0, 0, 0.45), transparent 62%);
+  pointer-events: none;
 }
 .gem-0 { --a: var(--g0a); --b: var(--g0b); }
 .gem-1 { --a: var(--g1a); --b: var(--g1b); }
@@ -234,16 +244,36 @@ body {
 .gem-3 { --a: var(--g3a); --b: var(--g3b); }
 .gem-4 { --a: var(--g4a); --b: var(--g4b); }
 .gem-5 { --a: var(--g5a); --b: var(--g5b); }
+.gem-6 { --a: var(--g6a); --b: var(--g6b); }
+.gem-7 { --a: var(--g7a); --b: var(--g7b); }
+
+/* Formas geométricas — uma por cor. */
+.shape-0 { --shape: circle(50%); }
+.shape-1 { --shape: polygon(50% 1%, 99% 50%, 50% 99%, 1% 50%); }
+.shape-2 { --shape: polygon(50% 1%, 95% 26%, 95% 74%, 50% 99%, 5% 74%, 5% 26%); }
+.shape-3 { --shape: inset(2% round 26%); }
+.shape-4 { --shape: polygon(50% 5%, 96% 92%, 4% 92%); }
+.shape-5 { --shape: polygon(50% 1%, 99% 39%, 80% 98%, 20% 98%, 1% 39%); }
+.shape-6 {
+  --shape: polygon(
+    50% 1%, 61% 36%, 98% 36%, 68% 58%, 79% 95%,
+    50% 72%, 21% 95%, 32% 58%, 2% 36%, 39% 36%
+  );
+}
+.shape-7 {
+  --shape: polygon(31% 1%, 69% 1%, 99% 31%, 99% 69%, 69% 99%, 31% 99%, 1% 69%, 1% 31%);
+}
 
 .gem .facet {
   position: absolute;
-  top: 12%;
-  left: 16%;
-  width: 40%;
-  height: 30%;
-  background: radial-gradient(100% 100% at 30% 30%, rgba(255, 255, 255, 0.85), transparent 70%);
+  top: 10%;
+  left: 14%;
+  width: 44%;
+  height: 34%;
+  background: radial-gradient(100% 100% at 32% 28%, rgba(255, 255, 255, 0.92), transparent 72%);
   border-radius: 50%;
   pointer-events: none;
+  z-index: 1;
 }
 
 .gem.enter {

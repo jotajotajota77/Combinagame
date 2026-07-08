@@ -1,4 +1,4 @@
-import { ROWS, COLS, NCOLORS } from './constants.js'
+import { ROWS, COLS, config } from './constants.js'
 
 // Contador global de ids estáveis — usados como chave de animação (FLIP) na UI.
 let _nextId = 1
@@ -32,7 +32,7 @@ export function cloneBoard(board) {
 }
 
 export function randomColor(rng = Math.random) {
-  return Math.floor(rng() * NCOLORS)
+  return Math.floor(rng() * config.numColors)
 }
 
 // Cria um tabuleiro cheio sem nenhum match inicial (nem linhas de 3, nem quadrados 2x2).

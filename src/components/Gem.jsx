@@ -24,6 +24,8 @@ export default function Gem({ gem, popping = false, entering = false }) {
   const cls = [
     'gem',
     isBomb ? 'gem-bomb' : `gem-${gem.color}`,
+    // cada cor tem uma forma geométrica própria (não só a cor)
+    isBomb ? '' : `shape-${gem.color}`,
     gem.special ? `sp-${gem.special}` : '',
     popping ? 'pop' : '',
     entering ? 'enter' : '',

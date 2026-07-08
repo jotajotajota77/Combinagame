@@ -12,9 +12,11 @@ export default function App() {
         <Hud
           score={game.score}
           combo={game.combo}
+          numColors={game.numColors}
           onNewGame={game.newGame}
           onShuffle={game.shuffle}
           onHint={game.showHint}
+          onColors={game.changeColors}
         />
 
         <div className="board-wrap">

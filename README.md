@@ -12,6 +12,9 @@ satisfatórias — cascatas infinitas, do seu jeito e no seu ritmo.
 - Formas maiores criam **gemas especiais** (veja abaixo).
 - **Duplo-clique** numa gema especial para ativá-la sem precisar trocar.
 - Sem jogadas? O tabuleiro **reembaralha sozinho** — ou use o botão _Embaralhar_.
+- Escolha de **2 a 8 cores** no seletor 🎨 — cada cor tem uma **forma geométrica própria**
+  (círculo, losango, hexágono, quadrado, triângulo, pentágono, estrela, octógono), então dá pra
+  jogar reconhecendo pela forma, não só pela cor.
 
 O contador de "peças combinadas" e os _combos_ são só um agrado visual: não há meta nem derrota.
 
