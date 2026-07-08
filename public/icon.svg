@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="30%" r="90%">
+      <stop offset="0%" stop-color="#2c1a54"/>
+      <stop offset="70%" stop-color="#160c2e"/>
+    </radialGradient>
+    <radialGradient id="red" cx="34%" cy="28%" r="90%">
+      <stop offset="0%" stop-color="#ff8090"/><stop offset="70%" stop-color="#d61f3a"/>
+    </radialGradient>
+    <radialGradient id="org" cx="34%" cy="28%" r="90%">
+      <stop offset="0%" stop-color="#ff8a3d"/><stop offset="70%" stop-color="#e0430c"/>
+    </radialGradient>
+    <radialGradient id="yel" cx="34%" cy="28%" r="90%">
+      <stop offset="0%" stop-color="#ffe873"/><stop offset="70%" stop-color="#eab60a"/>
+    </radialGradient>
+    <radialGradient id="pur" cx="34%" cy="28%" r="90%">
+      <stop offset="0%" stop-color="#c39bff"/><stop offset="70%" stop-color="#7a45d6"/>
+    </radialGradient>
+    <radialGradient id="gloss" cx="32%" cy="26%" r="45%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- círculo vermelho -->
+  <g>
+    <circle cx="186" cy="186" r="74" fill="url(#red)"/>
+    <circle cx="186" cy="186" r="74" fill="url(#gloss)"/>
+  </g>
+  <!-- losango laranja -->
+  <g>
+    <polygon points="326,112 400,186 326,260 252,186" fill="url(#org)"/>
+    <polygon points="326,112 400,186 326,260 252,186" fill="url(#gloss)"/>
+  </g>
+  <!-- hexágono amarelo -->
+  <g>
+    <polygon points="186,252 250,289 250,363 186,400 122,363 122,289" fill="url(#yel)"/>
+    <polygon points="186,252 250,289 250,363 186,400 122,363 122,289" fill="url(#gloss)"/>
+  </g>
+  <!-- pentágono roxo -->
+  <g>
+    <polygon points="326,252 400,306 372,392 280,392 252,306" fill="url(#pur)"/>
+    <polygon points="326,252 400,306 372,392 280,392 252,306" fill="url(#gloss)"/>
+  </g>
+</svg>

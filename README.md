@@ -43,6 +43,14 @@ npm test         # testes do motor (Vitest)
 npm run build    # build de produção em dist/
 ```
 
+## Instalar no celular (PWA)
+
+O jogo é um **PWA instalável**: abra o site no navegador do celular e use
+**"Adicionar à tela inicial"** (Android/Chrome mostra o convite de instalação; no iPhone,
+Safari → Compartilhar → _Adicionar à Tela de Início_). Ele abre em tela cheia, com ícone próprio,
+e funciona **offline** depois da primeira visita (service worker em `public/sw.js` + manifest em
+`public/manifest.webmanifest`).
+
 ## Deploy no GitHub Pages
 
 O jogo é 100% estático. O workflow em `.github/workflows/deploy.yml` faz **build e deploy
