@@ -1,0 +1,332 @@
+import { ROWS, COLS, SPECIAL, DIR, BOMB_COLOR } from './constants.js'
+import { cloneBoard, key, parseKey, inBounds } from './board.js'
+import { findMatchGroups } from './matches.js'
+import { applyGravity } from './gravity.js'
+import {
+  rowCells,
+  colCells,
+  areaCells,
+  colorCells,
+  stripedCells,
+  randomPresentColor,
+  pickFishTargets,
+} from './specials.js'
+
+const MAX_ROUNDS = 300
+
+function mapToList(map) {
+  return [...map].map(([k, color]) => ({ ...parseKey(k), color }))
+}
+
+// ---------------------------------------------------------------------------
+// Ativação de um único especial. Adiciona células a `clearSet` (respeitando os
+// especiais protegidos, recém-criados) e registra efeitos visuais. Retorna as
+// células novas limpas para encadear ativações.
+// ---------------------------------------------------------------------------
+export function triggerSpecial(board, r, c, ctx, rng, clearSet, recolorMap, effects, protectedSet) {
+  const gem = board[r][c]
+  const newly = []
+  const add = (cell) => {
+    if (!inBounds(cell.r, cell.c)) return
+    const k = key(cell.r, cell.c)
+    if (protectedSet.has(k)) return
+    if (!clearSet.has(k)) {
+      clearSet.add(k)
+      newly.push(cell)
+    }
+  }
+  if (!gem || !gem.special) {
+    add({ r, c })
+    return newly
+  }
+
+  switch (gem.special) {
+    case SPECIAL.STRIPED: {
+      const dir = gem.dir || DIR.ROW
+      stripedCells(r, c, dir).forEach(add)
+      effects.push({ kind: 'stripe', dir, r, c })
+      break
+    }
+    case SPECIAL.WRAPPED: {
+      areaCells(r, c, 1).forEach(add)
+      effects.push({ kind: 'wrap', r, c })
+      break
+    }
+    case SPECIAL.BOMB: {
+      const target = ctx.bombColor != null ? ctx.bombColor : randomPresentColor(board, null, rng)
+      colorCells(board, target).forEach(add)
+      add({ r, c })
+      effects.push({ kind: 'bomb', color: target, r, c })
+      break
+    }
+    case SPECIAL.FISH: {
+      const count = ctx.fishCount || 1 + Math.floor(rng() * 3)
+      const targets = pickFishTargets(board, r, c, count, rng)
+      targets.forEach(add)
+      add({ r, c })
+      effects.push({ kind: 'fish', from: { r, c }, targets })
+      break
+    }
+    case SPECIAL.COCO: {
+      const toColor = gem.color
+      const fromColor =
+        ctx.convertFrom != null ? ctx.convertFrom : randomPresentColor(board, toColor, rng)
+      for (const cell of colorCells(board, fromColor)) {
+        const k = key(cell.r, cell.c)
+        if (!clearSet.has(k) && !protectedSet.has(k)) recolorMap.set(k, toColor)
+      }
+      add({ r, c })
+      effects.push({ kind: 'coco', from: fromColor, to: toColor, r, c })
+      break
+    }
+    default:
+      add({ r, c })
+  }
+  return newly
+}
+
+// Expande a cadeia de ativações: cada especial limpo dispara e pode acionar outros.
+export function expandActivations(
+  board,
+  clearSet,
+  recolorMap,
+  effects,
+  protectedSet,
+  rng,
+  extraSeeds = [],
+) {
+  const processed = new Set()
+  const queue = []
+  const enqueue = (r, c, ctx) => {
+    const k = key(r, c)
+    if (processed.has(k) || protectedSet.has(k)) return
+    const g = board[r][c]
+    if (g && g.special) queue.push({ r, c, ctx: ctx || {} })
+  }
+  for (const k of [...clearSet]) {
+    const { r, c } = parseKey(k)
+    enqueue(r, c)
+  }
+  for (const s of extraSeeds) queue.push(s)
+
+  let guard = 0
+  while (queue.length && guard++ < ROWS * COLS * 4) {
+    const { r, c, ctx } = queue.shift()
+    const k = key(r, c)
+    if (processed.has(k)) continue
+    processed.add(k)
+    const newly = triggerSpecial(board, r, c, ctx, rng, clearSet, recolorMap, effects, protectedSet)
+    for (const cell of newly) enqueue(cell.r, cell.c)
+  }
+}
+
+// Constrói o novo tabuleiro após uma limpeza: cria especiais, aplica recolorações,
+// e remove as células limpas.
+export function applyClear(board, clearSet, recolorMap, createList) {
+  const nb = cloneBoard(board)
+  for (const cr of createList) {
+    const g = nb[cr.r][cr.c]
+    if (g) {
+      g.special = cr.special
+      g.dir = cr.dir
+      g.color = cr.color
+    }
+  }
+  for (const [k, color] of recolorMap) {
+    if (clearSet.has(k)) continue
+    const { r, c } = parseKey(k)
+    if (nb[r][c]) nb[r][c].color = color
+  }
+  for (const k of clearSet) {
+    const { r, c } = parseKey(k)
+    nb[r][c] = null
+  }
+  return nb
+}
+
+// Detecta matches e monta a resolução de uma rodada (sem aplicar).
+export function computeMatchResolution(board, preferredOrigins, rng) {
+  const groups = findMatchGroups(board, preferredOrigins)
+  if (groups.length === 0) return null
+
+  const clearSet = new Set()
+  const createList = []
+  const recolorMap = new Map()
+  const effects = []
+  const protectedSet = new Set()
+
+  for (const g of groups) {
+    if (g.special) protectedSet.add(key(g.origin.r, g.origin.c))
+  }
+  for (const g of groups) {
+    if (g.special) {
+      const ok = key(g.origin.r, g.origin.c)
+      createList.push({
+        r: g.origin.r,
+        c: g.origin.c,
+        special: g.special,
+        dir: g.dir,
+        color: g.special === SPECIAL.BOMB ? BOMB_COLOR : g.color,
+      })
+      for (const cell of g.cells) {
+        const k = key(cell.r, cell.c)
+        if (k !== ok) clearSet.add(k)
+      }
+    } else {
+      for (const cell of g.cells) clearSet.add(key(cell.r, cell.c))
+    }
+  }
+
+  expandActivations(board, clearSet, recolorMap, effects, protectedSet, rng)
+  return { clearSet, createList, recolorMap, effects }
+}
+
+// Loop de cascata após uma limpeza inicial: gravidade → match → repete.
+export function cascade(startBoard, steps, rng) {
+  let cur = startBoard
+  let rounds = 0
+  while (rounds++ < MAX_ROUNDS) {
+    const gb = cloneBoard(cur)
+    const { moves, spawns } = applyGravity(gb, rng)
+    if (moves.length || spawns.length) {
+      steps.push({ type: 'fall', board: cloneBoard(gb), moves, spawns })
+    }
+    cur = gb
+
+    const res = computeMatchResolution(cur, [], rng)
+    if (!res) break
+    const nb = applyClear(cur, res.clearSet, res.recolorMap, res.createList)
+    steps.push({
+      type: 'clear',
+      board: cloneBoard(nb),
+      cleared: [...res.clearSet].map(parseKey),
+      creates: res.createList,
+      effects: res.effects,
+      recolors: mapToList(res.recolorMap),
+    })
+    cur = nb
+  }
+  return cur
+}
+
+// ---------------------------------------------------------------------------
+// Ativação por troca (combos + curingas bomba/coco). Devolve as sementes da
+// primeira limpeza, ou null se não for uma troca de especial.
+// ---------------------------------------------------------------------------
+const isWild = (g) => g && (g.special === SPECIAL.BOMB || g.special === SPECIAL.COCO)
+
+export function handleSwapActivation(board, p1, p2, rng) {
+  const g1 = board[p1.r][p1.c]
+  const g2 = board[p2.r][p2.c]
+  if (!g1 || !g2) return null
+
+  const wildcard = isWild(g1) || isWild(g2)
+  const bothSpecial = g1.special && g2.special
+  if (!wildcard && !bothSpecial) return null
+
+  const clearSet = new Set()
+  const recolorMap = new Map()
+  const effects = []
+  const extraSeeds = []
+  const upgrades = []
+  const addClear = (cell) => clearSet.add(key(cell.r, cell.c))
+  const center = p2
+
+  const t1 = g1.special
+  const t2 = g2.special
+
+  // --- bomba + bomba: limpa o tabuleiro inteiro ---
+  if (t1 === SPECIAL.BOMB && t2 === SPECIAL.BOMB) {
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) addClear({ r, c })
+    effects.push({ kind: 'bomb-board', r: center.r, c: center.c })
+    return { clearSet, recolorMap, effects, extraSeeds, upgrades }
+  }
+
+  // --- bomba + X ---
+  if (t1 === SPECIAL.BOMB || t2 === SPECIAL.BOMB) {
+    const bombPos = t1 === SPECIAL.BOMB ? p1 : p2
+    const other = t1 === SPECIAL.BOMB ? g2 : g1
+    const otherPos = t1 === SPECIAL.BOMB ? p2 : p1
+    addClear(bombPos)
+    if (!other.special || other.special === SPECIAL.COCO) {
+      // bomba + normal (ou coco): limpa toda a cor do parceiro
+      colorCells(board, other.color).forEach(addClear)
+      addClear(otherPos)
+      effects.push({ kind: 'bomb', color: other.color, r: bombPos.r, c: bombPos.c })
+    } else {
+      // bomba + especial: converte toda a cor naquele especial e ativa todos
+      addClear(otherPos)
+      let i = 0
+      for (const cell of colorCells(board, other.color)) {
+        upgrades.push({
+          r: cell.r,
+          c: cell.c,
+          special: other.special,
+          dir: other.dir || (i++ % 2 ? DIR.COL : DIR.ROW),
+          color: other.color,
+        })
+      }
+      effects.push({ kind: 'bomb-upgrade', special: other.special, color: other.color })
+    }
+    return { clearSet, recolorMap, effects, extraSeeds, upgrades }
+  }
+
+  // --- coco + X (sem bomba) ---
+  if (t1 === SPECIAL.COCO || t2 === SPECIAL.COCO) {
+    const coco = t1 === SPECIAL.COCO ? g1 : g2
+    const cocoPos = t1 === SPECIAL.COCO ? p1 : p2
+    const other = t1 === SPECIAL.COCO ? g2 : g1
+    const otherPos = t1 === SPECIAL.COCO ? p2 : p1
+    const toColor = coco.color
+    const fromColor = other.color
+    addClear(cocoPos)
+    for (const cell of colorCells(board, fromColor)) {
+      const k = key(cell.r, cell.c)
+      if (k !== key(cocoPos.r, cocoPos.c)) recolorMap.set(k, toColor)
+    }
+    if (other.special && other.special !== SPECIAL.COCO) {
+      // após converter, dispara o especial parceiro
+      extraSeeds.push({ r: otherPos.r, c: otherPos.c, ctx: {} })
+    } else if (other.special === SPECIAL.COCO) {
+      addClear(otherPos)
+    }
+    effects.push({ kind: 'coco', from: fromColor, to: toColor, r: cocoPos.r, c: cocoPos.c })
+    return { clearSet, recolorMap, effects, extraSeeds, upgrades }
+  }
+
+  // --- combos entre listrada / embrulhada / peixe ---
+  addClear(p1)
+  addClear(p2)
+  const set = new Set([t1, t2])
+  if (t1 === SPECIAL.STRIPED && t2 === SPECIAL.STRIPED) {
+    rowCells(center.r).forEach(addClear)
+    colCells(center.c).forEach(addClear)
+    effects.push({ kind: 'cross', r: center.r, c: center.c })
+  } else if (set.has(SPECIAL.STRIPED) && set.has(SPECIAL.WRAPPED)) {
+    for (let dr = -1; dr <= 1; dr++) rowCells(center.r + dr).forEach(addClear)
+    for (let dc = -1; dc <= 1; dc++) colCells(center.c + dc).forEach(addClear)
+    effects.push({ kind: 'bigcross', r: center.r, c: center.c })
+  } else if (t1 === SPECIAL.WRAPPED && t2 === SPECIAL.WRAPPED) {
+    areaCells(center.r, center.c, 2).forEach(addClear)
+    effects.push({ kind: 'bigwrap', r: center.r, c: center.c })
+  } else if (set.has(SPECIAL.FISH)) {
+    const partner = t1 === SPECIAL.FISH ? g2 : g1
+    const targets = pickFishTargets(board, center.r, center.c, 3, rng)
+    for (const t of targets) {
+      addClear(t)
+      if (partner.special === SPECIAL.STRIPED) {
+        rowCells(t.r).forEach(addClear)
+        colCells(t.c).forEach(addClear)
+      } else if (partner.special === SPECIAL.WRAPPED) {
+        areaCells(t.r, t.c, 1).forEach(addClear)
+      }
+    }
+    effects.push({ kind: 'fish-combo', from: center, targets })
+  } else {
+    areaCells(center.r, center.c, 1).forEach(addClear)
+    effects.push({ kind: 'wrap', r: center.r, c: center.c })
+  }
+  return { clearSet, recolorMap, effects, extraSeeds, upgrades }
+}
+
+export { mapToList }
