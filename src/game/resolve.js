@@ -62,7 +62,8 @@ export function triggerSpecial(board, r, c, ctx, rng, clearSet, recolorMap, effe
       break
     }
     case SPECIAL.FISH: {
-      const count = ctx.fishCount || 1 + Math.floor(rng() * 3)
+      // Peixe sozinho (cascata/duplo-clique/consumido numa combinação): sempre 2 peixes.
+      const count = ctx.fishCount ?? 2
       const targets = pickFishTargets(board, r, c, count, rng)
       targets.forEach(add)
       add({ r, c })
@@ -246,6 +247,76 @@ export function handleSwapActivation(board, p1, p2, rng) {
   if (t1 === SPECIAL.BOMB && t2 === SPECIAL.BOMB) {
     for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) addClear({ r, c })
     effects.push({ kind: 'bomb-board', r: center.r, c: center.c })
+    return { clearSet, recolorMap, effects, extraSeeds, upgrades }
+  }
+
+  // --- peixe + peixe: um cardume de 5 peixes ---
+  if (t1 === SPECIAL.FISH && t2 === SPECIAL.FISH) {
+    addClear(p1)
+    addClear(p2)
+    const targets = pickFishTargets(board, center.r, center.c, 5, rng)
+    targets.forEach(addClear)
+    effects.push({ kind: 'fish-combo', from: center, targets })
+    return { clearSet, recolorMap, effects, extraSeeds, upgrades }
+  }
+
+  // --- peixe + qualquer outro especial: só 1 peixe nada até 1 alvo e carrega o
+  // efeito do parceiro (ex.: peixe+listrada → 1 peixe que, ao chegar, limpa a
+  // linha/coluna do alvo; peixe+bomba → 1 peixe que limpa a cor do alvo). ---
+  if (t1 === SPECIAL.FISH || t2 === SPECIAL.FISH) {
+    const fish = t1 === SPECIAL.FISH ? g1 : g2
+    const fishPos = t1 === SPECIAL.FISH ? p1 : p2
+    const partner = t1 === SPECIAL.FISH ? g2 : g1
+    const partnerPos = t1 === SPECIAL.FISH ? p2 : p1
+    addClear(fishPos)
+    addClear(partnerPos)
+
+    const [target] = pickFishTargets(board, fishPos.r, fishPos.c, 1, rng)
+    if (!target) {
+      effects.push({ kind: 'fish', from: fishPos, targets: [] })
+      return { clearSet, recolorMap, effects, extraSeeds, upgrades }
+    }
+    addClear(target)
+    effects.push({ kind: 'fish', from: fishPos, targets: [target] })
+
+    switch (partner.special) {
+      case SPECIAL.STRIPED: {
+        const dir = partner.dir || DIR.ROW
+        stripedCells(target.r, target.c, dir).forEach(addClear)
+        effects.push({ kind: 'stripe', dir, r: target.r, c: target.c })
+        break
+      }
+      case SPECIAL.WRAPPED: {
+        areaCells(target.r, target.c, 1).forEach(addClear)
+        effects.push({ kind: 'wrap', r: target.r, c: target.c })
+        break
+      }
+      case SPECIAL.BOMB: {
+        const color = fish.color
+        const hits = colorCells(board, color).filter(
+          (cell) => !(cell.r === target.r && cell.c === target.c),
+        )
+        hits.forEach(addClear)
+        effects.push({ kind: 'bomb', color, r: target.r, c: target.c, targets: hits })
+        break
+      }
+      case SPECIAL.COCO: {
+        const toColor = partner.color
+        const fromColor = fish.color === toColor ? randomPresentColor(board, toColor, rng) : fish.color
+        const painted = []
+        for (const cell of colorCells(board, fromColor)) {
+          const k = key(cell.r, cell.c)
+          if (k !== key(target.r, target.c) && !clearSet.has(k)) {
+            recolorMap.set(k, toColor)
+            painted.push(cell)
+          }
+        }
+        effects.push({ kind: 'coco', from: fromColor, to: toColor, r: target.r, c: target.c, targets: painted })
+        break
+      }
+      default:
+        break
+    }
     return { clearSet, recolorMap, effects, extraSeeds, upgrades }
   }
 

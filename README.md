@@ -24,15 +24,20 @@ O contador de "peças combinadas" e os _combos_ são só um agrado visual: não 
 |---|---|---|
 | 4 em linha | **Listrada** | limpa a linha ou a coluna inteira |
 | Forma em **T / L** (5 peças, sem 2×2) | **Embrulhada** | explode uma área 3×3 |
-| Qualquer forma que contenha um **2×2** | **Peixe** 🐟 | peixes nadam pela tela até os alvos e os explodem |
-| **5 em linha** reta | **Bomba de cor** | dispara raios até todas as peças da cor misturada e as destrói |
+| Qualquer forma que contenha um **2×2** (e não se enquadre acima) | **Peixe** 🐟 | 2 peixes nadam em curva pela tela e só estouram o alvo (com qualquer efeito em cadeia) ao chegar |
+| **5 em linha** reta (sem ramificação) | **Bomba de cor** | dispara raios até todas as peças da cor misturada e as destrói |
 | **Linha de 5 + perna** (T com braço de 5) | **Roda de coco** | tem cor própria; lança gotas de tinta que pintam todas as peças da cor misturada com a cor dela |
+
+Quando a mesma combinação se qualifica para mais de um especial, a **bomba/roda de coco tem
+prioridade sobre o peixe** (uma linha de 5 nunca vira peixe, mesmo se também contiver um 2×2).
 
 **Toda gema especial dispara ao ser destruída** — se um efeito atinge outra especial, ela também
 ativa (efeitos em cadeia). Os **combos entre especiais** seguem o Candy Crush clássico
 (listrada+listrada, bomba+bomba limpando o tabuleiro, bomba+especial "promovendo" toda uma cor,
 etc.). A bomba de cor e a roda de coco, quando ativadas por duplo-clique, escolhem uma
-**cor aleatória**.
+**cor aleatória**. Peixe é especial: **peixe+peixe** solta um cardume de **5 peixes**; **peixe +
+qualquer outro especial** solta só **1 peixe**, que carrega o efeito do parceiro (ex.: peixe +
+listrada → o peixe nada até 1 alvo e, ao chegar, limpa a linha/coluna dali).
 
 ## Rodando localmente
 

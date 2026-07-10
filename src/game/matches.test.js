@@ -87,4 +87,22 @@ describe('classificação de formas', () => {
     const b = makeBoard({ '0,0': 0, '0,1': 0, '0,2': 0, '0,3': 0, '1,0': 0, '1,1': 0, '0,4': 4 })
     expect(specials(b)).toContain(SPECIAL.FISH)
   })
+
+  it('2x2 unido a uma linha de 5 → nunca vira peixe (bomba/coco têm prioridade)', () => {
+    // linha r2 c0-4 (5) + (3,0),(3,1) formam um 2x2 com (2,0),(2,1) no mesmo grupo.
+    const b = makeBoard({
+      '2,0': 0,
+      '2,1': 0,
+      '2,2': 0,
+      '2,3': 0,
+      '2,4': 0,
+      '3,0': 0,
+      '3,1': 0,
+      '1,0': 2,
+      '4,0': 3,
+    })
+    const s = specials(b)
+    expect(s).not.toContain(SPECIAL.FISH)
+    expect(s.some((sp) => sp === SPECIAL.BOMB || sp === SPECIAL.COCO)).toBe(true)
+  })
 })

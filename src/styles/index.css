@@ -296,7 +296,9 @@ body {
   animation: drop-in 0.34s cubic-bezier(0.34, 1.2, 0.5, 1);
 }
 .gem.pop {
-  animation: pop-out 0.32s ease forwards;
+  animation: pop-out 0.32s ease both;
+  /* Alvo de peixe: só estoura quando o peixe chega (ver --pop-delay em Board.jsx). */
+  animation-delay: var(--pop-delay, 0ms);
 }
 
 /* Especiais */
@@ -469,7 +471,13 @@ body {
   width: 0;
   height: 0;
   z-index: 7;
+}
+.travel.drop {
   animation: travel 0.42s ease-in-out forwards;
+}
+/* Peixe: nada em curva (não em linha reta) até o alvo — ver keyframes fish-swim-path. */
+.travel.fish-swim {
+  animation: fish-swim-path 0.62s ease-in-out forwards;
 }
 .travel-inner {
   position: absolute;
@@ -477,6 +485,9 @@ body {
   top: 0;
   transform: translate(-50%, -50%);
   display: block;
+}
+.fish-wiggle {
+  animation: fish-wiggle 0.35s ease-in-out infinite;
 }
 .fish-body {
   display: block;
@@ -522,6 +533,21 @@ body {
   15% { opacity: 1; }
   85% { opacity: 1; }
   100% { left: var(--tl); top: var(--tt); opacity: 0.9; }
+}
+/* Caminho ondulado do peixe — 5 pontos (--p0.. --p4) calculados em Board.jsx a
+   partir de um desvio perpendicular à linha reta, para nadar em curva/zigue-zague. */
+@keyframes fish-swim-path {
+  0% { left: var(--p0x); top: var(--p0y); opacity: 0; }
+  10% { opacity: 1; }
+  25% { left: var(--p1x); top: var(--p1y); }
+  50% { left: var(--p2x); top: var(--p2y); }
+  75% { left: var(--p3x); top: var(--p3y); }
+  90% { opacity: 1; }
+  100% { left: var(--p4x); top: var(--p4y); opacity: 0.9; }
+}
+@keyframes fish-wiggle {
+  0%, 100% { rotate: -10deg; }
+  50% { rotate: 10deg; }
 }
 @keyframes ray-grow {
   0% { transform: rotate(var(--rot, 0deg)) scaleX(0); opacity: 0; }
@@ -592,5 +618,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .tile { transition: none; }
   .gem, .gem.enter, .gem.pop, .fx { animation-duration: 0.01ms !important; }
+  .gem.pop { animation-delay: 0ms !important; }
+  .travel, .fish-wiggle { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
   .install-badge { animation: pop-in 0.01ms ease !important; }
 }

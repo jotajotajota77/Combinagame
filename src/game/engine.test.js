@@ -108,6 +108,60 @@ describe('especiais — combos', () => {
     const upgrade = res.steps.flatMap((s) => s.effects || []).find((e) => e.kind === 'bomb-upgrade')
     expect(upgrade).toBeTruthy()
   })
+
+  it('peixe + peixe solta um cardume de exatamente 5 peixes', () => {
+    const b = makeBoard({
+      '4,4': { color: 0, special: SPECIAL.FISH },
+      '4,5': { color: 1, special: SPECIAL.FISH },
+    })
+    const res = resolveMove(b, { r: 4, c: 4 }, { r: 4, c: 5 }, seededRng(21))
+    expect(res.valid).toBe(true)
+    const fishFx = res.steps.flatMap((s) => s.effects || []).filter((e) => e.kind === 'fish-combo')
+    expect(fishFx).toHaveLength(1)
+    expect(fishFx[0].targets).toHaveLength(5)
+  })
+
+  it('peixe + listrada solta só 1 peixe, que carrega o efeito da listrada', () => {
+    const b = makeBoard({
+      '4,4': { color: 0, special: SPECIAL.FISH },
+      '4,5': { color: 1, special: SPECIAL.STRIPED, dir: DIR.ROW },
+    })
+    const res = resolveMove(b, { r: 4, c: 4 }, { r: 4, c: 5 }, seededRng(23))
+    expect(res.valid).toBe(true)
+    const effects = res.steps.flatMap((s) => s.effects || [])
+    const fishFx = effects.filter((e) => e.kind === 'fish')
+    expect(fishFx).toHaveLength(1)
+    expect(fishFx[0].targets).toHaveLength(1)
+    const stripe = effects.find((e) => e.kind === 'stripe')
+    expect(stripe).toBeTruthy()
+    // a listrada dispara na posição do alvo do peixe, não no centro da troca.
+    expect(stripe.r).toBe(fishFx[0].targets[0].r)
+    expect(stripe.c).toBe(fishFx[0].targets[0].c)
+  })
+
+  it('peixe + bomba de cor solta só 1 peixe, que carrega o efeito da bomba', () => {
+    const b = makeBoard({
+      '4,4': { color: 0, special: SPECIAL.FISH },
+      '4,5': { color: -1, special: SPECIAL.BOMB },
+    })
+    const res = resolveMove(b, { r: 4, c: 4 }, { r: 4, c: 5 }, seededRng(29))
+    expect(res.valid).toBe(true)
+    const effects = res.steps.flatMap((s) => s.effects || [])
+    const fishFx = effects.filter((e) => e.kind === 'fish')
+    expect(fishFx).toHaveLength(1)
+    expect(fishFx[0].targets).toHaveLength(1)
+    const bomb = effects.find((e) => e.kind === 'bomb')
+    expect(bomb).toBeTruthy()
+    expect(bomb.color).toBe(0) // cor do peixe (o "misturado")
+  })
+
+  it('peixe ativado sozinho (duplo-clique) solta sempre 2 peixes', () => {
+    const b = makeBoard({ '3,3': { color: 0, special: SPECIAL.FISH } })
+    const res = activateAt(b, 3, 3, seededRng(31))
+    expect(res.valid).toBe(true)
+    const fishFx = res.steps.flatMap((s) => s.effects || []).find((e) => e.kind === 'fish')
+    expect(fishFx.targets).toHaveLength(2)
+  })
 })
 
 describe('especiais — duplo-clique', () => {

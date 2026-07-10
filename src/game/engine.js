@@ -51,7 +51,11 @@ export function resolveMove(board, a, b, rng = Math.random) {
       }
     }
     const extraSeeds = [...seed.extraSeeds, ...seed.upgrades.map((u) => ({ r: u.r, c: u.c, ctx: {} }))]
-    expandActivations(board2, seed.clearSet, seed.recolorMap, seed.effects, new Set(), rng, extraSeeds)
+    // As duas células trocadas já tiveram seu efeito computado manualmente acima
+    // (handleSwapActivation) — protege-as para a expansão automática não as
+    // disparar de novo (senão duplicaria o efeito com um ctx aleatório novo).
+    const swappedProtected = new Set([key(a.r, a.c), key(b.r, b.c)])
+    expandActivations(board2, seed.clearSet, seed.recolorMap, seed.effects, swappedProtected, rng, extraSeeds)
     const nb = applyClear(board2, seed.clearSet, seed.recolorMap, [])
     steps.push(clearStep(nb, seed.clearSet, seed.recolorMap, [], seed.effects))
     const finalBoard = cascade(nb, steps, rng)
