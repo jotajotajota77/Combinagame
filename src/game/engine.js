@@ -55,10 +55,18 @@ export function resolveMove(board, a, b, rng = Math.random) {
     // (handleSwapActivation) — protege-as para a expansão automática não as
     // disparar de novo (senão duplicaria o efeito com um ctx aleatório novo).
     const swappedProtected = new Set([key(a.r, a.c), key(b.r, b.c)])
-    expandActivations(board2, seed.clearSet, seed.recolorMap, seed.effects, swappedProtected, rng, extraSeeds)
+    const pending = expandActivations(
+      board2,
+      seed.clearSet,
+      seed.recolorMap,
+      seed.effects,
+      swappedProtected,
+      rng,
+      extraSeeds,
+    )
     const nb = applyClear(board2, seed.clearSet, seed.recolorMap, [])
     steps.push(clearStep(nb, seed.clearSet, seed.recolorMap, [], seed.effects))
-    const finalBoard = cascade(nb, steps, rng)
+    const finalBoard = cascade(nb, steps, rng, pending)
     return { valid: true, steps, board: finalBoard }
   }
 
@@ -70,7 +78,7 @@ export function resolveMove(board, a, b, rng = Math.random) {
   }
   const nb = applyClear(board2, res.clearSet, res.recolorMap, res.createList)
   steps.push(clearStep(nb, res.clearSet, res.recolorMap, res.createList, res.effects))
-  const finalBoard = cascade(nb, steps, rng)
+  const finalBoard = cascade(nb, steps, rng, res.pending)
   return { valid: true, steps, board: finalBoard }
 }
 
@@ -83,10 +91,10 @@ export function activateAt(board, r, c, rng = Math.random) {
   const clearSet = new Set()
   const recolorMap = new Map()
   const effects = []
-  expandActivations(board2, clearSet, recolorMap, effects, new Set(), rng, [{ r, c, ctx: {} }])
+  const pending = expandActivations(board2, clearSet, recolorMap, effects, new Set(), rng, [{ r, c, ctx: {} }])
   const nb = applyClear(board2, clearSet, recolorMap, [])
   const steps = [clearStep(nb, clearSet, recolorMap, [], effects)]
-  const finalBoard = cascade(nb, steps, rng)
+  const finalBoard = cascade(nb, steps, rng, pending)
   return { valid: true, steps, board: finalBoard }
 }
 

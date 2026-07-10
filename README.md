@@ -31,13 +31,17 @@ O contador de "peças combinadas" e os _combos_ são só um agrado visual: não 
 Quando a mesma combinação se qualifica para mais de um especial, a **bomba/roda de coco tem
 prioridade sobre o peixe** (uma linha de 5 nunca vira peixe, mesmo se também contiver um 2×2).
 
-**Toda gema especial dispara ao ser destruída** — se um efeito atinge outra especial, ela também
-ativa (efeitos em cadeia). Os **combos entre especiais** seguem o Candy Crush clássico
-(listrada+listrada, bomba+bomba limpando o tabuleiro, bomba+especial "promovendo" toda uma cor,
-etc.). A bomba de cor e a roda de coco, quando ativadas por duplo-clique, escolhem uma
-**cor aleatória**. Peixe é especial: **peixe+peixe** solta um cardume de **5 peixes**; **peixe +
-qualquer outro especial** solta só **1 peixe**, que carrega o efeito do parceiro (ex.: peixe +
-listrada → o peixe nada até 1 alvo e, ao chegar, limpa a linha/coluna dali).
+**Toda gema especial dispara ao ser destruída** — mas **efeitos em cadeia nunca se sobrepõem**:
+se uma listrada atinge uma bomba de raspão, primeiro a listrada limpa sua linha (a bomba fica
+intacta), as peças caem e repõem, e só **depois** a bomba dispara sozinha, na rodada seguinte. A
+única exceção são os **combos por troca direta (mistura)** — listrada+listrada, bomba+bomba
+limpando o tabuleiro, bomba+especial "promovendo" toda uma cor, etc. — que seguem o Candy Crush
+clássico e continuam simultâneos, num único efeito. A bomba de cor e a roda de coco, quando
+ativadas por duplo-clique, escolhem uma **cor aleatória**. Peixe é especial: **peixe+peixe** solta
+um cardume de **5 peixes**; **peixe + qualquer outro especial** solta só **1 peixe**, que carrega
+o efeito do parceiro (ex.: peixe + listrada → o peixe nada até 1 alvo e, ao chegar, limpa a
+linha/coluna dali) — e o peixe nunca mira numa peça que já esteja marcada pra sumir na mesma
+resolução.
 
 ## Rodando localmente
 

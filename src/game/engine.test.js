@@ -87,6 +87,24 @@ describe('especiais — combos', () => {
     expect(cross).toBeTruthy()
   })
 
+  it('mistura (combo por troca) é única: pega uma 3ª especial de raspão e ativa junto, no mesmo passo', () => {
+    const b = makeBoard({
+      '4,4': { color: 0, special: SPECIAL.STRIPED, dir: DIR.ROW },
+      '4,5': { color: 1, special: SPECIAL.STRIPED, dir: DIR.COL },
+      '4,7': { color: 2, special: SPECIAL.WRAPPED }, // pega de raspão na linha 4
+    })
+    const res = resolveMove(b, { r: 4, c: 4 }, { r: 4, c: 5 }, seededRng(11))
+    expect(res.valid).toBe(true)
+    // A mistura é única: cross + wrap devem estar no MESMO passo 'clear', sem
+    // queda/reposição entre eles (diferente de um encadeamento comum).
+    const stepIdx = res.steps.findIndex(
+      (s) => s.type === 'clear' && (s.effects || []).some((e) => e.kind === 'cross'),
+    )
+    expect(stepIdx).toBeGreaterThanOrEqual(0)
+    const step = res.steps[stepIdx]
+    expect((step.effects || []).some((e) => e.kind === 'wrap')).toBe(true)
+  })
+
   it('bomba + bomba limpa o tabuleiro inteiro', () => {
     const b = makeBoard({
       '4,4': { color: -1, special: SPECIAL.BOMB },
@@ -204,6 +222,32 @@ describe('especiais disparam ao serem destruídos', () => {
     expect(effects.some((e) => e.kind === 'stripe')).toBe(true)
     // a bomba pega no feixe deve disparar também
     expect(effects.some((e) => e.kind === 'bomb')).toBe(true)
+  })
+
+  it('efeitos em cadeia nunca se sobrepõem: a bomba só dispara numa rodada seguinte', () => {
+    // mesmo cenário acima, mas verificando o SEQUENCIAMENTO: stripe e bomb devem
+    // estar em passos 'clear' DIFERENTES, com uma queda/reposição no meio — a
+    // bomba não pode disparar simultaneamente com a listrada que a atingiu.
+    const b = makeBoard({
+      '3,3': { color: 0, special: SPECIAL.STRIPED, dir: DIR.ROW },
+      '3,6': { color: -1, special: SPECIAL.BOMB },
+    })
+    const res = activateAt(b, 3, 3, seededRng(8))
+    expect(res.valid).toBe(true)
+
+    const stripeStepIdx = res.steps.findIndex(
+      (s) => s.type === 'clear' && (s.effects || []).some((e) => e.kind === 'stripe'),
+    )
+    const bombStepIdx = res.steps.findIndex(
+      (s) => s.type === 'clear' && (s.effects || []).some((e) => e.kind === 'bomb'),
+    )
+    expect(stripeStepIdx).toBeGreaterThanOrEqual(0)
+    expect(bombStepIdx).toBeGreaterThan(stripeStepIdx)
+    // nenhum passo 'clear' deve conter os dois efeitos ao mesmo tempo.
+    expect(stripeStepIdx).not.toBe(bombStepIdx)
+    // e deve haver uma queda (gravidade/reposição) entre um e outro.
+    const between = res.steps.slice(stripeStepIdx + 1, bombStepIdx)
+    expect(between.some((s) => s.type === 'fall')).toBe(true)
   })
 
   it('especial com cor dentro de uma combinação é ativado antes de sumir', () => {

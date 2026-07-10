@@ -64,13 +64,18 @@ export function randomPresentColor(board, exclude, rng = Math.random) {
 }
 
 // Alvos do peixe (gema 1): prioriza gemas especiais/alvos; completa com aleatórias.
-export function pickFishTargets(board, r, c, count, rng = Math.random) {
+// `exclude` (Set de chaves "r,c") deixa de fora células já marcadas para sumir
+// nesta mesma resolução (por outro efeito), pra o peixe nunca nadar até algo
+// que já foi destruído/ativado.
+export function pickFishTargets(board, r, c, count, rng = Math.random, exclude = null) {
   const self = key(r, c)
   const specials = []
   const normals = []
   for (let rr = 0; rr < ROWS; rr++) {
     for (let cc = 0; cc < COLS; cc++) {
-      if (key(rr, cc) === self) continue
+      const k = key(rr, cc)
+      if (k === self) continue
+      if (exclude && exclude.has(k)) continue
       const g = board[rr][cc]
       if (!g) continue
       if (g.special) specials.push({ r: rr, c: cc })

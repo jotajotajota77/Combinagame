@@ -20,20 +20,30 @@ function mapToList(map) {
 
 // ---------------------------------------------------------------------------
 // Ativação de um único especial. Adiciona células a `clearSet` (respeitando os
-// especiais protegidos, recém-criados) e registra efeitos visuais. Retorna as
-// células novas limpas para encadear ativações.
+// especiais protegidos, recém-criados) e registra efeitos visuais.
+//
+// Efeitos nunca se sobrepõem: se a área/linha/cor de um especial pega OUTRO
+// especial de raspão, esse outro NÃO é limpo/disparado agora — fica intacto e
+// vai para `pendingIds` (o id da gema), para ativar sozinho numa rodada
+// seguinte (depois da gravidade repor as peças). A única exceção são os
+// combos por troca direta (mistura), que não passam por aqui.
 // ---------------------------------------------------------------------------
-export function triggerSpecial(board, r, c, ctx, rng, clearSet, recolorMap, effects, protectedSet) {
+export function triggerSpecial(board, r, c, ctx, rng, clearSet, recolorMap, effects, protectedSet, pendingIds) {
   const gem = board[r][c]
   const newly = []
   const add = (cell) => {
     if (!inBounds(cell.r, cell.c)) return
     const k = key(cell.r, cell.c)
     if (protectedSet.has(k)) return
-    if (!clearSet.has(k)) {
-      clearSet.add(k)
-      newly.push(cell)
+    if (clearSet.has(k)) return
+    const isSelf = cell.r === r && cell.c === c
+    const target = board[cell.r][cell.c]
+    if (!isSelf && target && target.special) {
+      pendingIds.add(target.id)
+      return
     }
+    clearSet.add(k)
+    newly.push(cell)
   }
   if (!gem || !gem.special) {
     add({ r, c })
@@ -64,7 +74,7 @@ export function triggerSpecial(board, r, c, ctx, rng, clearSet, recolorMap, effe
     case SPECIAL.FISH: {
       // Peixe sozinho (cascata/duplo-clique/consumido numa combinação): sempre 2 peixes.
       const count = ctx.fishCount ?? 2
-      const targets = pickFishTargets(board, r, c, count, rng)
+      const targets = pickFishTargets(board, r, c, count, rng, clearSet)
       targets.forEach(add)
       add({ r, c })
       effects.push({ kind: 'fish', from: { r, c }, targets })
@@ -93,7 +103,11 @@ export function triggerSpecial(board, r, c, ctx, rng, clearSet, recolorMap, effe
   return newly
 }
 
-// Expande a cadeia de ativações: cada especial limpo dispara e pode acionar outros.
+// Dispara um conjunto de sementes (especiais já presentes em `clearSet`, mais
+// `extraSeeds` explícitas) uma única vez cada — sem recursão automática: se o
+// disparo de uma semente pegar OUTRO especial de raspão, ele fica pendente
+// (ver `triggerSpecial`) em vez de ativar na mesma passagem. Devolve o Set de
+// ids pendentes, para o chamador agendá-los numa rodada seguinte.
 export function expandActivations(
   board,
   clearSet,
@@ -103,29 +117,64 @@ export function expandActivations(
   rng,
   extraSeeds = [],
 ) {
+  const pendingIds = new Set()
   const processed = new Set()
-  const queue = []
-  const enqueue = (r, c, ctx) => {
+  const seeds = []
+  const addSeed = (r, c, ctx) => {
     const k = key(r, c)
     if (processed.has(k) || protectedSet.has(k)) return
     const g = board[r][c]
-    if (g && g.special) queue.push({ r, c, ctx: ctx || {} })
+    if (g && g.special) {
+      processed.add(k)
+      seeds.push({ r, c, ctx: ctx || {} })
+    }
   }
   for (const k of [...clearSet]) {
     const { r, c } = parseKey(k)
-    enqueue(r, c)
+    addSeed(r, c)
   }
-  for (const s of extraSeeds) queue.push(s)
+  for (const s of extraSeeds) {
+    const k = key(s.r, s.c)
+    if (!processed.has(k)) {
+      processed.add(k)
+      seeds.push(s)
+    }
+  }
 
-  let guard = 0
-  while (queue.length && guard++ < ROWS * COLS * 4) {
-    const { r, c, ctx } = queue.shift()
-    const k = key(r, c)
-    if (processed.has(k)) continue
-    processed.add(k)
-    const newly = triggerSpecial(board, r, c, ctx, rng, clearSet, recolorMap, effects, protectedSet)
-    for (const cell of newly) enqueue(cell.r, cell.c)
+  for (const { r, c, ctx } of seeds) {
+    triggerSpecial(board, r, c, ctx, rng, clearSet, recolorMap, effects, protectedSet, pendingIds)
   }
+  return pendingIds
+}
+
+// Localiza a posição atual de uma gema por id (a gravidade pode ter deslocado
+// uma gema pendente antes de ela finalmente disparar).
+function findById(board, id) {
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (board[r][c] && board[r][c].id === id) return { r, c }
+    }
+  }
+  return null
+}
+
+// Dispara os especiais pendentes de uma rodada anterior (cada um numa gema já
+// assentada pela gravidade). Devolve null se nenhum ainda existir no tabuleiro.
+function fireDeferred(board, ids, rng) {
+  const clearSet = new Set()
+  const recolorMap = new Map()
+  const effects = []
+  const protectedSet = new Set()
+  const pendingIds = new Set()
+  for (const id of ids) {
+    const pos = findById(board, id)
+    if (!pos) continue
+    const k = key(pos.r, pos.c)
+    if (clearSet.has(k)) continue
+    triggerSpecial(board, pos.r, pos.c, {}, rng, clearSet, recolorMap, effects, protectedSet, pendingIds)
+  }
+  if (clearSet.size === 0 && recolorMap.size === 0) return null
+  return { clearSet, recolorMap, effects, pending: pendingIds }
 }
 
 // Constrói o novo tabuleiro após uma limpeza: cria especiais, aplica recolorações,
@@ -185,14 +234,18 @@ export function computeMatchResolution(board, preferredOrigins, rng) {
     }
   }
 
-  expandActivations(board, clearSet, recolorMap, effects, protectedSet, rng)
-  return { clearSet, createList, recolorMap, effects }
+  const pending = expandActivations(board, clearSet, recolorMap, effects, protectedSet, rng)
+  return { clearSet, createList, recolorMap, effects, pending }
 }
 
 // Loop de cascata após uma limpeza inicial: gravidade → match → repete.
-export function cascade(startBoard, steps, rng) {
+// `initialPending` são ids de especiais pegos de raspão (não deste round) que
+// ainda precisam disparar sozinhos, cada um na sua própria rodada (gravidade
+// entre eles) — nunca sobrepostos ao efeito que os pegou.
+export function cascade(startBoard, steps, rng, initialPending = new Set()) {
   let cur = startBoard
   let rounds = 0
+  let pending = initialPending
   while (rounds++ < MAX_ROUNDS) {
     const gb = cloneBoard(cur)
     const { moves, spawns } = applyGravity(gb, rng)
@@ -200,6 +253,24 @@ export function cascade(startBoard, steps, rng) {
       steps.push({ type: 'fall', board: cloneBoard(gb), moves, spawns })
     }
     cur = gb
+
+    if (pending.size) {
+      const res = fireDeferred(cur, pending, rng)
+      pending = new Set()
+      if (!res) continue
+      const nb = applyClear(cur, res.clearSet, res.recolorMap, [])
+      steps.push({
+        type: 'clear',
+        board: cloneBoard(nb),
+        cleared: [...res.clearSet].map(parseKey),
+        creates: [],
+        effects: res.effects,
+        recolors: mapToList(res.recolorMap),
+      })
+      cur = nb
+      pending = res.pending
+      continue
+    }
 
     const res = computeMatchResolution(cur, [], rng)
     if (!res) break
@@ -213,6 +284,7 @@ export function cascade(startBoard, steps, rng) {
       recolors: mapToList(res.recolorMap),
     })
     cur = nb
+    pending = res.pending || new Set()
   }
   return cur
 }
@@ -254,7 +326,7 @@ export function handleSwapActivation(board, p1, p2, rng) {
   if (t1 === SPECIAL.FISH && t2 === SPECIAL.FISH) {
     addClear(p1)
     addClear(p2)
-    const targets = pickFishTargets(board, center.r, center.c, 5, rng)
+    const targets = pickFishTargets(board, center.r, center.c, 5, rng, clearSet)
     targets.forEach(addClear)
     effects.push({ kind: 'fish-combo', from: center, targets })
     return { clearSet, recolorMap, effects, extraSeeds, upgrades }
@@ -271,7 +343,7 @@ export function handleSwapActivation(board, p1, p2, rng) {
     addClear(fishPos)
     addClear(partnerPos)
 
-    const [target] = pickFishTargets(board, fishPos.r, fishPos.c, 1, rng)
+    const [target] = pickFishTargets(board, fishPos.r, fishPos.c, 1, rng, clearSet)
     if (!target) {
       effects.push({ kind: 'fish', from: fishPos, targets: [] })
       return { clearSet, recolorMap, effects, extraSeeds, upgrades }
@@ -392,19 +464,6 @@ export function handleSwapActivation(board, p1, p2, rng) {
   } else if (t1 === SPECIAL.WRAPPED && t2 === SPECIAL.WRAPPED) {
     areaCells(center.r, center.c, 2).forEach(addClear)
     effects.push({ kind: 'bigwrap', r: center.r, c: center.c })
-  } else if (set.has(SPECIAL.FISH)) {
-    const partner = t1 === SPECIAL.FISH ? g2 : g1
-    const targets = pickFishTargets(board, center.r, center.c, 3, rng)
-    for (const t of targets) {
-      addClear(t)
-      if (partner.special === SPECIAL.STRIPED) {
-        rowCells(t.r).forEach(addClear)
-        colCells(t.c).forEach(addClear)
-      } else if (partner.special === SPECIAL.WRAPPED) {
-        areaCells(t.r, t.c, 1).forEach(addClear)
-      }
-    }
-    effects.push({ kind: 'fish-combo', from: center, targets })
   } else {
     areaCells(center.r, center.c, 1).forEach(addClear)
     effects.push({ kind: 'wrap', r: center.r, c: center.c })
