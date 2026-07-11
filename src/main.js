@@ -10,6 +10,7 @@ import {
   decreaseRange,
   UPGRADE_LIMITS,
 } from './game/upgrades.js'
+import { buyHeal, buyHpUpgrade, canBuyHeal, canBuyHpUpgrade, healCost, hpUpgradeCost } from './game/shop.js'
 
 const appEl = document.getElementById('app')
 const canvas = document.getElementById('game')
@@ -34,6 +35,13 @@ const btnFireRateMinus = document.getElementById('btn-firerate-minus')
 const btnFireRatePlus = document.getElementById('btn-firerate-plus')
 const btnRangeMinus = document.getElementById('btn-range-minus')
 const btnRangePlus = document.getElementById('btn-range-plus')
+
+const shopPanelEl = document.getElementById('shop-panel')
+const shopTimerEl = document.getElementById('shop-timer')
+const healCostEl = document.getElementById('heal-cost')
+const hpUpgradeCostEl = document.getElementById('hp-upgrade-cost')
+const btnBuyHeal = document.getElementById('btn-buy-heal')
+const btnBuyHp = document.getElementById('btn-buy-hp')
 
 let dpr = Math.max(1, window.devicePixelRatio || 1)
 let state = null
@@ -100,6 +108,21 @@ function updateHud() {
     finalCoinsEl.textContent = state.coins
     gameOverEl.classList.remove('hidden')
   }
+  updateShopPanel()
+}
+
+// A loja só aparece durante o descanso entre ondas; refeita a cada frame pra
+// refletir moedas ganhas nesse meio-tempo e desabilitar o que ficou caro.
+function updateShopPanel() {
+  const resting = !state.gameOver && state.wave.phase === 'resting'
+  shopPanelEl.classList.toggle('hidden', !resting)
+  if (!resting) return
+
+  shopTimerEl.textContent = Math.ceil(state.wave.timer)
+  healCostEl.textContent = healCost()
+  hpUpgradeCostEl.textContent = hpUpgradeCost(state)
+  btnBuyHeal.disabled = !canBuyHeal(state)
+  btnBuyHp.disabled = !canBuyHpUpgrade(state)
 }
 
 let lastTime = performance.now()
@@ -142,6 +165,9 @@ btnRangePlus.addEventListener('click', () => {
   increaseRange(state)
   updateUpgradePanel()
 })
+
+btnBuyHeal.addEventListener('click', () => buyHeal(state))
+btnBuyHp.addEventListener('click', () => buyHpUpgrade(state))
 
 newGame()
 resize()

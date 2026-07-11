@@ -20,11 +20,13 @@ as direções. Primeira fatia do jogo — bem simples de propósito, pra ir cres
   reiniciar.
 - No rodapé, 3 controles com botões **+/−** ajustam **ataque**, **cadência** e **alcance** do
   núcleo na hora (sem custo); um círculo sutil no campo marca o alcance atual.
-- Cada abate (por tiro) rende **moedas** — tipos mais difíceis de matar rendem mais. Por enquanto
-  só acumulam no HUD; ainda não há loja pra gastá-las.
+- Cada abate (por tiro) rende **moedas** — tipos mais difíceis de matar rendem mais.
+- Durante o descanso entre ondas, aparece uma **loja** com duas compras: reparar o núcleo (cura
+  fixa, custo fixo) e reforçar o núcleo (+HP máximo permanente, fica mais caro a cada compra). Os
+  botões desabilitam sozinhos quando faltam moedas ou não há o que curar.
 
-Sem menus, sem loja ainda — só o núcleo, os inimigos, os tiros, as ondas, os ajustes manuais de
-torre e as moedas por abate.
+Sem menu inicial, sem som ainda — só o núcleo, os inimigos, os tiros, as ondas, os ajustes manuais
+de torre, as moedas por abate e a loja entre ondas.
 
 ## Rodando localmente
 
@@ -43,7 +45,8 @@ npm run build    # build de produção em dist/
   ataque/cadência/alcance de `state.core`), `projectiles` (movimento + colisão + moedas por
   abate), `waves` (progressão de ondas/dificuldade e sorteio de tipo), `upgrades` (ajusta
   ataque/cadência/alcance do núcleo, com limites), `particles` (explosão de partículas na morte de
-  inimigos/dano no núcleo), `step` (orquestra um frame).
+  inimigos/dano no núcleo), `shop` (compras entre ondas com as moedas: reparar/reforçar o
+  núcleo), `step` (orquestra um frame).
 - `src/render.js` — desenha o estado atual no canvas (não muta nada).
 - `src/main.js` — loop principal (`requestAnimationFrame`), redimensionamento e HUD.
 - `src/game/*.test.js` — testes do motor (Vitest).

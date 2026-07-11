@@ -40,6 +40,21 @@
         </p>
         <button id="restart">Reiniciar</button>
       </div>
+      <div id="shop-panel" class="hidden">
+        <span class="shop-header">Loja — próxima onda em <span id="shop-timer">3</span>s</span>
+        <div class="shop-items">
+          <button class="shop-item" id="btn-buy-heal">
+            <span class="shop-item-name">Reparar núcleo</span>
+            <span class="shop-item-desc">+30 HP</span>
+            <span class="shop-item-cost"><span id="heal-cost">15</span> moedas</span>
+          </button>
+          <button class="shop-item" id="btn-buy-hp">
+            <span class="shop-item-name">Reforçar núcleo</span>
+            <span class="shop-item-desc">+15 HP máx.</span>
+            <span class="shop-item-cost"><span id="hp-upgrade-cost">20</span> moedas</span>
+          </button>
+        </div>
+      </div>
       <div id="upgrade-panel">
         <div class="upgrade-chip">
           <button class="upgrade-btn" id="btn-damage-minus" aria-label="Diminuir ataque">−</button>

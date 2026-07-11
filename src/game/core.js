@@ -27,6 +27,7 @@ export function createGame(width, height) {
     fireTimer: 0,
     kills: 0,
     coins: 0,
+    shop: { hpUpgradesBought: 0 },
     time: 0,
     gameOver: false,
   }

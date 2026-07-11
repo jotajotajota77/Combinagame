@@ -20,6 +20,14 @@ export const TURRET_DAMAGE = 10
 export const PROJECTILE_SPEED = 420 // px/s
 export const PROJECTILE_RADIUS = 4
 
+// Loja entre ondas: gasta moedas em melhorias permanentes/consumíveis do
+// núcleo. Só fica disponível durante o descanso (wave.phase === 'resting').
+export const SHOP_HEAL_COST = 15 // custo fixo — é consumível, não escala
+export const SHOP_HEAL_AMOUNT = 30
+export const SHOP_HP_UPGRADE_BASE_COST = 20
+export const SHOP_HP_UPGRADE_COST_STEP = 10 // cada compra encarece a próxima
+export const SHOP_HP_UPGRADE_AMOUNT = 15
+
 // Ondas: levas de inimigos com uma pausa entre elas. Cada onda tem mais
 // inimigos, nasce mais rápido, e os inimigos vêm um pouco mais fortes.
 export const WAVE_REST_SECONDS = 3 // descanso entre uma onda e a próxima

@@ -215,3 +215,70 @@ body {
   opacity: 0.35;
   cursor: default;
 }
+
+/* Loja: só aparece durante o descanso entre ondas, centralizada na tela. */
+#shop-panel {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: rgba(10, 14, 26, 0.9);
+  border: 1px solid rgba(120, 190, 255, 0.35);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.shop-header {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #bfe7ff;
+}
+
+.shop-items {
+  display: flex;
+  gap: 12px;
+}
+
+.shop-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(77, 163, 255, 0.12);
+  color: #eaf0ff;
+  font: inherit;
+  cursor: pointer;
+}
+.shop-item:active {
+  transform: scale(0.96);
+}
+.shop-item:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.shop-item-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.shop-item-desc {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.shop-item-cost {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffd76a;
+}
