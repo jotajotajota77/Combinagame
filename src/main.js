@@ -11,6 +11,7 @@ import {
   UPGRADE_LIMITS,
 } from './game/upgrades.js'
 import { buyHeal, buyHpUpgrade, canBuyHeal, canBuyHpUpgrade, healCost, hpUpgradeCost } from './game/shop.js'
+import { startNextWave } from './game/waves.js'
 
 const appEl = document.getElementById('app')
 const canvas = document.getElementById('game')
@@ -37,11 +38,11 @@ const btnRangeMinus = document.getElementById('btn-range-minus')
 const btnRangePlus = document.getElementById('btn-range-plus')
 
 const shopPanelEl = document.getElementById('shop-panel')
-const shopTimerEl = document.getElementById('shop-timer')
 const healCostEl = document.getElementById('heal-cost')
 const hpUpgradeCostEl = document.getElementById('hp-upgrade-cost')
 const btnBuyHeal = document.getElementById('btn-buy-heal')
 const btnBuyHp = document.getElementById('btn-buy-hp')
+const btnContinue = document.getElementById('btn-continue')
 
 let dpr = Math.max(1, window.devicePixelRatio || 1)
 let state = null
@@ -100,8 +101,7 @@ function updateHud() {
   killsEl.textContent = state.kills
   coinsEl.textContent = state.coins
   waveNumberEl.textContent = state.wave.number
-  waveStatusEl.textContent =
-    state.wave.phase === 'resting' ? `próxima em ${Math.ceil(state.wave.timer)}s` : ''
+  waveStatusEl.textContent = state.wave.phase === 'resting' ? 'em pausa — loja aberta' : ''
   if (state.gameOver && gameOverEl.classList.contains('hidden')) {
     finalKillsEl.textContent = state.kills
     finalWaveEl.textContent = state.wave.number
@@ -118,7 +118,6 @@ function updateShopPanel() {
   shopPanelEl.classList.toggle('hidden', !resting)
   if (!resting) return
 
-  shopTimerEl.textContent = Math.ceil(state.wave.timer)
   healCostEl.textContent = healCost()
   hpUpgradeCostEl.textContent = hpUpgradeCost(state)
   btnBuyHeal.disabled = !canBuyHeal(state)
@@ -168,6 +167,7 @@ btnRangePlus.addEventListener('click', () => {
 
 btnBuyHeal.addEventListener('click', () => buyHeal(state))
 btnBuyHp.addEventListener('click', () => buyHpUpgrade(state))
+btnContinue.addEventListener('click', () => startNextWave(state))
 
 newGame()
 resize()

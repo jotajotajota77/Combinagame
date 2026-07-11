@@ -37,6 +37,14 @@ describe('stepGame', () => {
     expect(JSON.stringify(state)).toBe(before)
   })
 
+  it('pausa completamente durante o descanso entre ondas (loja aberta)', () => {
+    const state = createGame(800, 600)
+    state.wave.phase = 'resting'
+    const before = JSON.stringify(state)
+    stepGame(state, 5, seededRng(6)) // mesmo um dt grande não deve mudar nada
+    expect(JSON.stringify(state)).toBe(before)
+  })
+
   it('uma horda que sobrecarrega a torre eventualmente derruba o núcleo', () => {
     // Um inimigo por vez a torre dá conta tranquilamente (mata mais rápido do
     // que eles chegam) — então pra testar a condição de derrota de verdade,

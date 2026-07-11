@@ -6,7 +6,6 @@ import {
   WAVE_MIN_SPAWN_INTERVAL,
   WAVE_HP_SCALE_PER_WAVE,
   WAVE_SPEED_SCALE_PER_WAVE,
-  WAVE_REST_SECONDS,
 } from './constants.js'
 import { spawnEnemy } from './enemies.js'
 import { pickEnemyType } from './enemyTypes.js'
@@ -36,31 +35,33 @@ export function createWaveState(wave = 1) {
 
 // Avança a máquina de estados da onda: nasce inimigos enquanto `spawning`;
 // quando todos os da onda já nasceram e o campo está limpo, entra em
-// `resting`; depois do descanso, começa a próxima onda (mais forte).
+// `resting`. `resting` não tem timer — o jogo fica pausado (ver step.js) com
+// a loja aberta até o jogador clicar em "Continuar" (ver startNextWave).
 export function updateWaves(state, dt, rng = Math.random) {
   const wave = state.wave
-  if (wave.phase === 'spawning') {
-    wave.timer -= dt
-    if (wave.timer <= 0 && wave.spawned < wave.total) {
-      const typeKey = pickEnemyType(wave.number, rng)
-      spawnEnemy(state, rng, waveEnemyScale(wave.number), typeKey)
-      wave.spawned++
-      wave.timer += waveSpawnInterval(wave.number)
-    }
-    if (wave.spawned >= wave.total && state.enemies.length === 0) {
-      wave.phase = 'resting'
-      wave.timer = WAVE_REST_SECONDS
-    }
-    return
-  }
+  if (wave.phase !== 'spawning') return
 
-  // resting
   wave.timer -= dt
-  if (wave.timer <= 0) {
-    wave.number += 1
-    wave.phase = 'spawning'
-    wave.spawned = 0
-    wave.total = waveEnemyCount(wave.number)
+  if (wave.timer <= 0 && wave.spawned < wave.total) {
+    const typeKey = pickEnemyType(wave.number, rng)
+    spawnEnemy(state, rng, waveEnemyScale(wave.number), typeKey)
+    wave.spawned++
+    wave.timer += waveSpawnInterval(wave.number)
+  }
+  if (wave.spawned >= wave.total && state.enemies.length === 0) {
+    wave.phase = 'resting'
     wave.timer = 0
   }
+}
+
+// Chamado pelo botão "Continuar" da loja — sai do descanso e começa a
+// próxima onda (mais forte que a anterior).
+export function startNextWave(state) {
+  const wave = state.wave
+  if (wave.phase !== 'resting') return
+  wave.number += 1
+  wave.phase = 'spawning'
+  wave.spawned = 0
+  wave.total = waveEnemyCount(wave.number)
+  wave.timer = 0
 }

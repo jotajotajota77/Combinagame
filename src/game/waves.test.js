@@ -6,8 +6,9 @@ import {
   waveEnemyScale,
   createWaveState,
   updateWaves,
+  startNextWave,
 } from './waves.js'
-import { WAVE_MIN_SPAWN_INTERVAL, WAVE_REST_SECONDS } from './constants.js'
+import { WAVE_MIN_SPAWN_INTERVAL } from './constants.js'
 import { seededRng } from './testUtils.js'
 
 describe('progressão de dificuldade', () => {
@@ -72,16 +73,33 @@ describe('updateWaves', () => {
     state.enemies = [] // simula o campo limpo (todos mortos/chegaram no núcleo)
     updateWaves(state, 0.001, rng)
     expect(state.wave.phase).toBe('resting')
-    expect(state.wave.timer).toBeCloseTo(WAVE_REST_SECONDS)
   })
 
-  it('depois do descanso, começa a onda seguinte (mais forte)', () => {
+  it('descanso não avança sozinho com o tempo — só sai dele via startNextWave', () => {
     const state = createGame(800, 600)
-    state.wave = { number: 1, phase: 'resting', spawned: 4, total: 4, timer: 0.01 }
-    updateWaves(state, 0.02, seededRng(4))
+    state.wave = { number: 1, phase: 'resting', spawned: 4, total: 4, timer: 0 }
+    updateWaves(state, 100, seededRng(4)) // mesmo um tempo enorme não deveria mudar nada
+    expect(state.wave.phase).toBe('resting')
+    expect(state.wave.number).toBe(1)
+  })
+})
+
+describe('startNextWave', () => {
+  it('sai do descanso e começa a próxima onda (mais forte)', () => {
+    const state = createGame(800, 600)
+    state.wave = { number: 1, phase: 'resting', spawned: 4, total: 4, timer: 0 }
+    startNextWave(state)
     expect(state.wave.number).toBe(2)
     expect(state.wave.phase).toBe('spawning')
     expect(state.wave.spawned).toBe(0)
     expect(state.wave.total).toBe(waveEnemyCount(2))
+  })
+
+  it('não faz nada se a onda ainda está em spawning', () => {
+    const state = createGame(800, 600)
+    state.wave = createWaveState(1)
+    startNextWave(state)
+    expect(state.wave.number).toBe(1)
+    expect(state.wave.phase).toBe('spawning')
   })
 })

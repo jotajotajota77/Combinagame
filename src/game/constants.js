@@ -28,9 +28,10 @@ export const SHOP_HP_UPGRADE_BASE_COST = 20
 export const SHOP_HP_UPGRADE_COST_STEP = 10 // cada compra encarece a próxima
 export const SHOP_HP_UPGRADE_AMOUNT = 15
 
-// Ondas: levas de inimigos com uma pausa entre elas. Cada onda tem mais
-// inimigos, nasce mais rápido, e os inimigos vêm um pouco mais fortes.
-export const WAVE_REST_SECONDS = 3 // descanso entre uma onda e a próxima
+// Ondas: levas de inimigos com uma pausa entre elas (jogo pausado, loja
+// aberta até o jogador clicar em "Continuar" — ver startNextWave em
+// waves.js). Cada onda tem mais inimigos, nasce mais rápido, e os inimigos
+// vêm um pouco mais fortes.
 export const WAVE_BASE_COUNT = 4 // inimigos na onda 1
 export const WAVE_COUNT_INCREMENT = 2 // inimigos a mais por onda
 export const WAVE_BASE_SPAWN_INTERVAL = 1.1 // segundos entre spawns na onda 1

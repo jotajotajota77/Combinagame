@@ -282,3 +282,18 @@ body {
   font-weight: 700;
   color: #ffd76a;
 }
+
+.shop-continue {
+  margin-top: 2px;
+  font: inherit;
+  font-weight: 700;
+  padding: 10px 28px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: #4da3ff;
+  color: #05070d;
+  cursor: pointer;
+}
+.shop-continue:active {
+  transform: scale(0.96);
+}

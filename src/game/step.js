@@ -8,6 +8,7 @@ import { updateWaves } from './waves.js'
 // frame do loop principal, então evitar realocar tudo importa).
 export function stepGame(state, dt, rng = Math.random) {
   if (state.gameOver) return state
+  if (state.wave.phase === 'resting') return state // loja aberta — tempo parado até o jogador continuar
 
   state.time += dt
 

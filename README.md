@@ -21,9 +21,11 @@ as direções. Primeira fatia do jogo — bem simples de propósito, pra ir cres
 - No rodapé, 3 controles com botões **+/−** ajustam **ataque**, **cadência** e **alcance** do
   núcleo na hora (sem custo); um círculo sutil no campo marca o alcance atual.
 - Cada abate (por tiro) rende **moedas** — tipos mais difíceis de matar rendem mais.
-- Durante o descanso entre ondas, aparece uma **loja** com duas compras: reparar o núcleo (cura
-  fixa, custo fixo) e reforçar o núcleo (+HP máximo permanente, fica mais caro a cada compra). Os
-  botões desabilitam sozinhos quando faltam moedas ou não há o que curar.
+- Durante o descanso entre ondas, o jogo **pausa de verdade** (nada se move, nenhum timer corre) e
+  abre uma **loja** com duas compras — reparar o núcleo (cura fixa, custo fixo) e reforçar o núcleo
+  (+HP máximo permanente, fica mais caro a cada compra) — mais um botão **Continuar** pra retomar
+  quando o jogador quiser, sem pressa. Os botões de compra desabilitam sozinhos quando faltam
+  moedas ou não há o que curar.
 
 Sem menu inicial, sem som ainda — só o núcleo, os inimigos, os tiros, as ondas, os ajustes manuais
 de torre, as moedas por abate e a loja entre ondas.
