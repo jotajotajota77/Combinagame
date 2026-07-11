@@ -6,8 +6,11 @@ const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
 const hpFill = document.getElementById('core-hp-fill')
 const killsEl = document.getElementById('kills')
+const waveNumberEl = document.getElementById('wave-number')
+const waveStatusEl = document.getElementById('wave-status')
 const gameOverEl = document.getElementById('game-over')
 const finalKillsEl = document.getElementById('final-kills')
+const finalWaveEl = document.getElementById('final-wave')
 const restartBtn = document.getElementById('restart')
 
 let dpr = Math.max(1, window.devicePixelRatio || 1)
@@ -39,8 +42,12 @@ function newGame() {
 function updateHud() {
   hpFill.style.width = `${Math.max(0, (state.core.hp / state.core.maxHp) * 100)}%`
   killsEl.textContent = state.kills
+  waveNumberEl.textContent = state.wave.number
+  waveStatusEl.textContent =
+    state.wave.phase === 'resting' ? `próxima em ${Math.ceil(state.wave.timer)}s` : ''
   if (state.gameOver && gameOverEl.classList.contains('hidden')) {
     finalKillsEl.textContent = state.kills
+    finalWaveEl.textContent = state.wave.number
     gameOverEl.classList.remove('hidden')
   }
 }

@@ -16,14 +16,19 @@
           <span class="hud-label">Núcleo</span>
           <div class="hp-bar"><div id="core-hp-fill" class="hp-fill"></div></div>
         </div>
-        <div class="hud-stat">
+        <div class="hud-stat hud-center">
+          <span class="hud-label">Onda</span>
+          <span id="wave-number" class="hud-value">1</span>
+          <span id="wave-status" class="hud-sub"></span>
+        </div>
+        <div class="hud-stat hud-right">
           <span class="hud-label">Abates</span>
           <span id="kills" class="hud-value">0</span>
         </div>
       </div>
       <div id="game-over" class="hidden">
         <h1>Núcleo destruído</h1>
-        <p><span id="final-kills">0</span> inimigos abatidos</p>
+        <p><span id="final-kills">0</span> inimigos abatidos — onda <span id="final-wave">1</span></p>
         <button id="restart">Reiniciar</button>
       </div>
     </div>

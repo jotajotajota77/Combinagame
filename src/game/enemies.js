@@ -17,17 +17,20 @@ function randomEdgePoint(width, height, rng) {
 
 // Cria um inimigo numa borda aleatória, já mirando o núcleo (a direção é fixada
 // no nascimento — o núcleo nunca se move, então isso equivale a persegui-lo).
-export function spawnEnemy(state, rng = Math.random) {
+// `scale` deixa as ondas mais avançadas gerarem inimigos mais fortes/rápidos.
+export function spawnEnemy(state, rng = Math.random, scale = { hp: 1, speed: 1 }) {
   const { x, y } = randomEdgePoint(state.width, state.height, rng)
   const dir = direction(x, y, state.core.x, state.core.y)
+  const speed = ENEMY_SPEED * (scale.speed ?? 1)
+  const hp = Math.round(ENEMY_HP * (scale.hp ?? 1))
   state.enemies.push({
     x,
     y,
-    vx: dir.x * ENEMY_SPEED,
-    vy: dir.y * ENEMY_SPEED,
+    vx: dir.x * speed,
+    vy: dir.y * speed,
     radius: ENEMY_RADIUS,
-    hp: ENEMY_HP,
-    maxHp: ENEMY_HP,
+    hp,
+    maxHp: hp,
   })
 }
 

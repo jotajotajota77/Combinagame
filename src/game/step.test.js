@@ -2,19 +2,21 @@ import { describe, it, expect } from 'vitest'
 import { createGame } from './core.js'
 import { stepGame } from './step.js'
 import { seededRng } from './testUtils.js'
-import { ENEMY_SPAWN_INTERVAL } from './constants.js'
+import { waveSpawnInterval } from './waves.js'
 
 describe('stepGame', () => {
-  it('nasce um inimigo quando o timer de spawn zera', () => {
+  it('a onda 1 nasce o primeiro inimigo assim que o jogo começa a rodar', () => {
     const state = createGame(800, 600)
-    stepGame(state, ENEMY_SPAWN_INTERVAL, seededRng(1))
+    stepGame(state, 1 / 60, seededRng(1))
     expect(state.enemies.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('não nasce inimigo antes da hora', () => {
+  it('não nasce um segundo inimigo antes do intervalo da onda passar', () => {
     const state = createGame(800, 600)
-    stepGame(state, ENEMY_SPAWN_INTERVAL / 2, seededRng(1))
-    expect(state.enemies).toHaveLength(0)
+    stepGame(state, 1 / 60, seededRng(1)) // nasce o 1º
+    const countAfterFirst = state.enemies.length
+    stepGame(state, waveSpawnInterval(1) / 2, seededRng(1))
+    expect(state.enemies.length).toBe(countAfterFirst)
   })
 
   it('termina o jogo quando o núcleo perde todo o hp', () => {

@@ -6,12 +6,15 @@ as direções. Primeira fatia do jogo — bem simples de propósito, pra ir cres
 ## Como funciona (v0)
 
 - O núcleo fica parado no centro da tela, com uma barra de vida.
-- Inimigos nascem nas bordas da tela em intervalos e andam em linha reta até o núcleo.
+- Inimigos vêm em **ondas**: uma leva nasce nas bordas da tela, e só quando o campo fica limpo
+  (todos mortos ou chegaram no núcleo) começa o descanso antes da próxima onda.
+- Cada onda tem mais inimigos, nascem mais rápido, e vêm um pouco mais fortes/rápidos que a
+  anterior — a dificuldade cresce aos poucos.
 - O núcleo mira e atira sozinho no inimigo mais próximo dentro do alcance.
 - Um inimigo que chega perto do núcleo causa dano nele e se sacrifica no impacto.
-- Quando o núcleo perde toda a vida, é game over — dá pra reiniciar.
+- Quando o núcleo perde toda a vida, é game over (mostra a onda alcançada) — dá pra reiniciar.
 
-Sem menus, sem upgrades, sem ondas ainda — só o núcleo, os inimigos e os tiros.
+Sem menus, sem upgrades ainda — só o núcleo, os inimigos, os tiros e as ondas.
 
 ## Rodando localmente
 
@@ -26,7 +29,8 @@ npm run build    # build de produção em dist/
 
 - `src/game/` — **motor puro** (sem canvas/DOM, testável): `constants` (números ajustáveis),
   `vector` (helpers 2D), `core` (estado inicial), `enemies` (spawn + movimento), `combat` (mira e
-  disparo da torre), `projectiles` (movimento + colisão), `step` (orquestra um frame).
+  disparo da torre), `projectiles` (movimento + colisão), `waves` (progressão de ondas/dificuldade),
+  `step` (orquestra um frame).
 - `src/render.js` — desenha o estado atual no canvas (não muta nada).
 - `src/main.js` — loop principal (`requestAnimationFrame`), redimensionamento e HUD.
 - `src/game/*.test.js` — testes do motor (Vitest).
