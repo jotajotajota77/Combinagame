@@ -16,8 +16,11 @@ as direções. Primeira fatia do jogo — bem simples de propósito, pra ir cres
 - Um inimigo que chega perto do núcleo causa dano nele (o quanto depende do tipo) e se sacrifica
   no impacto.
 - Quando o núcleo perde toda a vida, é game over (mostra a onda alcançada) — dá pra reiniciar.
+- No rodapé, 3 controles com botões **+/−** ajustam **ataque**, **cadência** e **alcance** do
+  núcleo na hora (sem custo); um círculo sutil no campo marca o alcance atual.
 
-Sem menus, sem upgrades ainda — só o núcleo, os inimigos, os tiros e as ondas.
+Sem menus, sem economia/loja ainda — só o núcleo, os inimigos, os tiros, as ondas e os ajustes
+manuais de torre.
 
 ## Rodando localmente
 
@@ -32,8 +35,10 @@ npm run build    # build de produção em dist/
 
 - `src/game/` — **motor puro** (sem canvas/DOM, testável): `constants` (números ajustáveis),
   `vector` (helpers 2D), `core` (estado inicial), `enemyTypes` (stats/cor por tipo de inimigo),
-  `enemies` (spawn + movimento), `combat` (mira e disparo da torre), `projectiles` (movimento +
-  colisão), `waves` (progressão de ondas/dificuldade e sorteio de tipo), `step` (orquestra um frame).
+  `enemies` (spawn + movimento), `combat` (mira e disparo da torre — lê ataque/cadência/alcance de
+  `state.core`), `projectiles` (movimento + colisão), `waves` (progressão de ondas/dificuldade e
+  sorteio de tipo), `upgrades` (ajusta ataque/cadência/alcance do núcleo, com limites), `step`
+  (orquestra um frame).
 - `src/render.js` — desenha o estado atual no canvas (não muta nada).
 - `src/main.js` — loop principal (`requestAnimationFrame`), redimensionamento e HUD.
 - `src/game/*.test.js` — testes do motor (Vitest).

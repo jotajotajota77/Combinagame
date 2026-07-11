@@ -9,6 +9,16 @@ function healthBar(ctx, x, y, width, ratio, color) {
   ctx.fillRect(x - width / 2, y, width * Math.max(0, ratio), height)
 }
 
+// Círculo sutil marcando o alcance atual da torre — só uma referência
+// discreta, não deve competir visualmente com o núcleo/inimigos/tiros.
+function drawRange(ctx, core) {
+  ctx.beginPath()
+  ctx.arc(core.x, core.y, core.range, 0, Math.PI * 2)
+  ctx.strokeStyle = 'rgba(120, 190, 255, 0.16)'
+  ctx.lineWidth = 1.5
+  ctx.stroke()
+}
+
 function drawCore(ctx, core) {
   const pulse = 1 + Math.sin(Date.now() / 300) * 0.04
   const gradient = ctx.createRadialGradient(core.x, core.y, 2, core.x, core.y, core.radius * pulse)
@@ -54,6 +64,7 @@ export function render(ctx, state) {
   ctx.fillStyle = 'rgba(10,14,26,1)'
   ctx.fillRect(0, 0, state.width, state.height)
 
+  drawRange(ctx, state.core)
   for (const p of state.projectiles) drawProjectile(ctx, p)
   for (const e of state.enemies) drawEnemy(ctx, e)
   drawCore(ctx, state.core)

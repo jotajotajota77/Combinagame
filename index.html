@@ -31,6 +31,32 @@
         <p><span id="final-kills">0</span> inimigos abatidos — onda <span id="final-wave">1</span></p>
         <button id="restart">Reiniciar</button>
       </div>
+      <div id="upgrade-panel">
+        <div class="upgrade-chip">
+          <button class="upgrade-btn" id="btn-damage-minus" aria-label="Diminuir ataque">−</button>
+          <span class="upgrade-info">
+            <span class="upgrade-label">Ataque</span>
+            <span id="stat-damage" class="upgrade-value">10</span>
+          </span>
+          <button class="upgrade-btn" id="btn-damage-plus" aria-label="Aumentar ataque">+</button>
+        </div>
+        <div class="upgrade-chip">
+          <button class="upgrade-btn" id="btn-firerate-minus" aria-label="Diminuir cadência">−</button>
+          <span class="upgrade-info">
+            <span class="upgrade-label">Cadência</span>
+            <span id="stat-firerate" class="upgrade-value">2.2/s</span>
+          </span>
+          <button class="upgrade-btn" id="btn-firerate-plus" aria-label="Aumentar cadência">+</button>
+        </div>
+        <div class="upgrade-chip">
+          <button class="upgrade-btn" id="btn-range-minus" aria-label="Diminuir alcance">−</button>
+          <span class="upgrade-info">
+            <span class="upgrade-label">Alcance</span>
+            <span id="stat-range" class="upgrade-value">320</span>
+          </span>
+          <button class="upgrade-btn" id="btn-range-plus" aria-label="Aumentar alcance">+</button>
+        </div>
+      </div>
     </div>
     <script type="module" src="/src/main.js"></script>
   </body>
