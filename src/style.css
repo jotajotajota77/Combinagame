@@ -31,8 +31,9 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
   padding: 14px 18px;
   pointer-events: none;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
@@ -44,11 +45,8 @@ body {
   gap: 4px;
 }
 
-.hud-center {
-  align-items: center;
-}
-
 .hud-right {
+  justify-self: end;
   align-items: flex-end;
 }
 
@@ -69,6 +67,28 @@ body {
   font-weight: 600;
   color: #ffd76a;
   min-height: 15px;
+}
+
+/* Onda: destacada num badge, sempre centralizado — não pode passar despercebida. */
+.wave-badge {
+  justify-self: center;
+  align-items: center;
+  padding: 6px 22px 8px;
+  border-radius: 999px;
+  background: rgba(77, 163, 255, 0.16);
+  border: 1px solid rgba(120, 190, 255, 0.55);
+  box-shadow: 0 0 18px rgba(77, 163, 255, 0.3);
+}
+
+.wave-badge .hud-label {
+  color: #bfe7ff;
+  opacity: 1;
+}
+
+.wave-badge .hud-value {
+  font-size: 28px;
+  line-height: 1.1;
+  color: #fff;
 }
 
 .hp-bar {
