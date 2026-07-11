@@ -11,6 +11,7 @@ import {
   UPGRADE_LIMITS,
 } from './game/upgrades.js'
 
+const appEl = document.getElementById('app')
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
 const hpFill = document.getElementById('core-hp-fill')
@@ -35,9 +36,20 @@ const btnRangePlus = document.getElementById('btn-range-plus')
 let dpr = Math.max(1, window.devicePixelRatio || 1)
 let state = null
 
+// `visualViewport` é a altura real e visível de verdade (desconta a barra do
+// navegador no celular quando ela está aberta) — mais confiável que
+// 100vh/100dvh no CSS ou até innerWidth/innerHeight, que em alguns
+// navegadores mobile empurram o rodapé pra fora da tela.
+function getViewportSize() {
+  const vv = window.visualViewport
+  return vv ? { w: vv.width, h: vv.height } : { w: window.innerWidth, h: window.innerHeight }
+}
+
 function resize() {
-  const { innerWidth: w, innerHeight: h } = window
+  const { w, h } = getViewportSize()
   dpr = Math.max(1, window.devicePixelRatio || 1)
+  appEl.style.width = `${w}px`
+  appEl.style.height = `${h}px`
   canvas.width = w * dpr
   canvas.height = h * dpr
   canvas.style.width = `${w}px`
@@ -52,8 +64,7 @@ function resize() {
 }
 
 function newGame() {
-  const w = window.innerWidth
-  const h = window.innerHeight
+  const { w, h } = getViewportSize()
   state = createGame(w, h)
   gameOverEl.classList.add('hidden')
   updateUpgradePanel()
@@ -98,6 +109,9 @@ function loop(now) {
 }
 
 window.addEventListener('resize', resize)
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', resize)
+}
 restartBtn.addEventListener('click', newGame)
 
 btnDamageMinus.addEventListener('click', () => {
