@@ -1,4 +1,4 @@
-import { ENEMY_DAMAGE, ENEMY_HP, ENEMY_RADIUS, ENEMY_SPEED } from './constants.js'
+import { ENEMY_TYPES } from './enemyTypes.js'
 import { direction, distance } from './vector.js'
 
 // Escolhe um ponto aleatório no perímetro do retângulo width x height —
@@ -17,20 +17,25 @@ function randomEdgePoint(width, height, rng) {
 
 // Cria um inimigo numa borda aleatória, já mirando o núcleo (a direção é fixada
 // no nascimento — o núcleo nunca se move, então isso equivale a persegui-lo).
-// `scale` deixa as ondas mais avançadas gerarem inimigos mais fortes/rápidos.
-export function spawnEnemy(state, rng = Math.random, scale = { hp: 1, speed: 1 }) {
+// `scale` deixa as ondas mais avançadas gerarem inimigos mais fortes/rápidos;
+// `typeKey` escolhe a aparência/stats-base (ver enemyTypes.js).
+export function spawnEnemy(state, rng = Math.random, scale = { hp: 1, speed: 1 }, typeKey = 'normal') {
+  const type = ENEMY_TYPES[typeKey] ?? ENEMY_TYPES.normal
   const { x, y } = randomEdgePoint(state.width, state.height, rng)
   const dir = direction(x, y, state.core.x, state.core.y)
-  const speed = ENEMY_SPEED * (scale.speed ?? 1)
-  const hp = Math.round(ENEMY_HP * (scale.hp ?? 1))
+  const speed = type.speed * (scale.speed ?? 1)
+  const hp = Math.round(type.hp * (scale.hp ?? 1))
   state.enemies.push({
     x,
     y,
     vx: dir.x * speed,
     vy: dir.y * speed,
-    radius: ENEMY_RADIUS,
+    radius: type.radius,
     hp,
     maxHp: hp,
+    damage: type.damage,
+    color: type.color,
+    type: typeKey,
   })
 }
 
@@ -43,7 +48,7 @@ export function updateEnemies(state, dt) {
     e.y += e.vy * dt
     const d = distance(e.x, e.y, state.core.x, state.core.y)
     if (d <= state.core.radius + e.radius) {
-      state.core.hp = Math.max(0, state.core.hp - ENEMY_DAMAGE)
+      state.core.hp = Math.max(0, state.core.hp - e.damage)
       continue // inimigo se sacrifica no impacto
     }
     alive.push(e)

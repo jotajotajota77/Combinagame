@@ -4,10 +4,7 @@ export const CORE_MAX_HP = 100
 
 export const ARENA_MARGIN = 40 // distância mínima do spawn até a borda da tela
 
-export const ENEMY_RADIUS = 12
-export const ENEMY_HP = 20
-export const ENEMY_SPEED = 60 // px/s
-export const ENEMY_DAMAGE = 10 // dano ao núcleo ao chegar perto
+// Stats por tipo de inimigo (radius/hp/speed/damage/cor) ficam em enemyTypes.js.
 
 export const TURRET_RANGE = 320 // alcance de detecção do núcleo
 export const TURRET_FIRE_INTERVAL = 0.45 // segundos entre disparos

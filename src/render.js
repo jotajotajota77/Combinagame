@@ -29,13 +29,13 @@ function drawCore(ctx, core) {
 function drawEnemy(ctx, e) {
   ctx.beginPath()
   ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2)
-  ctx.fillStyle = '#ff5470'
-  ctx.shadowColor = '#ff5470'
+  ctx.fillStyle = e.color
+  ctx.shadowColor = e.color
   ctx.shadowBlur = 10
   ctx.fill()
   ctx.shadowBlur = 0
 
-  healthBar(ctx, e.x, e.y - e.radius - 10, 26, e.hp / e.maxHp, '#ff9f5a')
+  healthBar(ctx, e.x, e.y - e.radius - 10, e.radius * 2.2, e.hp / e.maxHp, '#ff9f5a')
 }
 
 function drawProjectile(ctx, p) {

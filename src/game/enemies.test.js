@@ -3,7 +3,8 @@ import { createGame } from './core.js'
 import { spawnEnemy, updateEnemies } from './enemies.js'
 import { distance } from './vector.js'
 import { seededRng } from './testUtils.js'
-import { ENEMY_DAMAGE, CORE_MAX_HP } from './constants.js'
+import { CORE_MAX_HP } from './constants.js'
+import { ENEMY_TYPES } from './enemyTypes.js'
 
 describe('spawnEnemy', () => {
   it('nasce sempre em cima de alguma borda da arena', () => {
@@ -27,30 +28,76 @@ describe('spawnEnemy', () => {
     const after = distance(enemy.x, enemy.y, state.core.x, state.core.y)
     expect(after).toBeLessThan(before)
   })
+
+  it('sem tipo explícito, nasce como "normal"', () => {
+    const state = createGame(800, 600)
+    spawnEnemy(state, seededRng(9))
+    expect(state.enemies[0].type).toBe('normal')
+    expect(state.enemies[0].radius).toBe(ENEMY_TYPES.normal.radius)
+  })
+
+  it('com um tipo explícito, usa os stats daquele tipo', () => {
+    const state = createGame(800, 600)
+    spawnEnemy(state, seededRng(9), { hp: 1, speed: 1 }, 'tanky')
+    const e = state.enemies[0]
+    expect(e.type).toBe('tanky')
+    expect(e.hp).toBe(ENEMY_TYPES.tanky.hp)
+    expect(e.radius).toBe(ENEMY_TYPES.tanky.radius)
+    expect(e.damage).toBe(ENEMY_TYPES.tanky.damage)
+    expect(e.color).toBe(ENEMY_TYPES.tanky.color)
+  })
 })
 
 describe('updateEnemies', () => {
-  it('dano ao núcleo e remove o inimigo quando ele chega perto o bastante', () => {
+  it('dano ao núcleo (do próprio inimigo) e remove o inimigo quando ele chega perto o bastante', () => {
     const state = createGame(800, 600)
-    state.enemies.push({ x: state.core.x + 5, y: state.core.y, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20 })
+    state.enemies.push({
+      x: state.core.x + 5,
+      y: state.core.y,
+      vx: 0,
+      vy: 0,
+      radius: 12,
+      hp: 20,
+      maxHp: 20,
+      damage: 10,
+    })
     updateEnemies(state, 0)
-    expect(state.core.hp).toBe(CORE_MAX_HP - ENEMY_DAMAGE)
+    expect(state.core.hp).toBe(CORE_MAX_HP - 10)
     expect(state.enemies).toHaveLength(0)
   })
 
   it('não sobe o hp do núcleo abaixo de zero', () => {
     const state = createGame(800, 600)
     state.core.hp = 5
-    state.enemies.push({ x: state.core.x, y: state.core.y, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20 })
+    state.enemies.push({
+      x: state.core.x,
+      y: state.core.y,
+      vx: 0,
+      vy: 0,
+      radius: 12,
+      hp: 20,
+      maxHp: 20,
+      damage: 10,
+    })
     updateEnemies(state, 0)
     expect(state.core.hp).toBe(0)
   })
 
   it('inimigo longe do núcleo não causa dano nem some', () => {
     const state = createGame(800, 600)
-    state.enemies.push({ x: 0, y: 0, vx: 10, vy: 10, radius: 12, hp: 20, maxHp: 20 })
+    state.enemies.push({ x: 0, y: 0, vx: 10, vy: 10, radius: 12, hp: 20, maxHp: 20, damage: 10 })
     updateEnemies(state, 0.1)
     expect(state.core.hp).toBe(CORE_MAX_HP)
     expect(state.enemies).toHaveLength(1)
+  })
+
+  it('um tipo com mais dano (tanky) tira mais vida do núcleo ao chegar', () => {
+    const state = createGame(800, 600)
+    spawnEnemy(state, seededRng(1), { hp: 1, speed: 1 }, 'tanky')
+    const e = state.enemies[0]
+    e.x = state.core.x
+    e.y = state.core.y
+    updateEnemies(state, 0)
+    expect(state.core.hp).toBe(CORE_MAX_HP - ENEMY_TYPES.tanky.damage)
   })
 })

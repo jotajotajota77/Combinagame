@@ -22,7 +22,7 @@ describe('stepGame', () => {
   it('termina o jogo quando o núcleo perde todo o hp', () => {
     const state = createGame(800, 600)
     state.core.hp = 1
-    state.enemies.push({ x: state.core.x, y: state.core.y, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20 })
+    state.enemies.push({ x: state.core.x, y: state.core.y, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20, damage: 10 })
     stepGame(state, 0.016, seededRng(3))
     expect(state.core.hp).toBe(0)
     expect(state.gameOver).toBe(true)
@@ -52,6 +52,7 @@ describe('stepGame', () => {
         radius: 12,
         hp: 20,
         maxHp: 20,
+        damage: 10,
       })
     }
     const rng = seededRng(42)

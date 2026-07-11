@@ -9,6 +9,7 @@ import {
   WAVE_REST_SECONDS,
 } from './constants.js'
 import { spawnEnemy } from './enemies.js'
+import { pickEnemyType } from './enemyTypes.js'
 
 // Quantos inimigos a onda N tem, quão rápido eles nascem, e o quanto mais
 // fortes/rápidos são — tudo cresce aos poucos a cada onda.
@@ -41,7 +42,8 @@ export function updateWaves(state, dt, rng = Math.random) {
   if (wave.phase === 'spawning') {
     wave.timer -= dt
     if (wave.timer <= 0 && wave.spawned < wave.total) {
-      spawnEnemy(state, rng, waveEnemyScale(wave.number))
+      const typeKey = pickEnemyType(wave.number, rng)
+      spawnEnemy(state, rng, waveEnemyScale(wave.number), typeKey)
       wave.spawned++
       wave.timer += waveSpawnInterval(wave.number)
     }
