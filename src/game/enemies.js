@@ -38,6 +38,7 @@ export function spawnEnemy(state, rng = Math.random, scale = { hp: 1, speed: 1 }
     damage: type.damage,
     color: type.color,
     type: typeKey,
+    coinValue: type.coinValue,
   })
 }
 

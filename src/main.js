@@ -16,11 +16,13 @@ const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
 const hpFill = document.getElementById('core-hp-fill')
 const killsEl = document.getElementById('kills')
+const coinsEl = document.getElementById('coins')
 const waveNumberEl = document.getElementById('wave-number')
 const waveStatusEl = document.getElementById('wave-status')
 const gameOverEl = document.getElementById('game-over')
 const finalKillsEl = document.getElementById('final-kills')
 const finalWaveEl = document.getElementById('final-wave')
+const finalCoinsEl = document.getElementById('final-coins')
 const restartBtn = document.getElementById('restart')
 
 const statDamageEl = document.getElementById('stat-damage')
@@ -88,12 +90,14 @@ function updateUpgradePanel() {
 function updateHud() {
   hpFill.style.width = `${Math.max(0, (state.core.hp / state.core.maxHp) * 100)}%`
   killsEl.textContent = state.kills
+  coinsEl.textContent = state.coins
   waveNumberEl.textContent = state.wave.number
   waveStatusEl.textContent =
     state.wave.phase === 'resting' ? `próxima em ${Math.ceil(state.wave.timer)}s` : ''
   if (state.gameOver && gameOverEl.classList.contains('hidden')) {
     finalKillsEl.textContent = state.kills
     finalWaveEl.textContent = state.wave.number
+    finalCoinsEl.textContent = state.coins
     gameOverEl.classList.remove('hidden')
   }
 }

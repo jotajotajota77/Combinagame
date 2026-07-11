@@ -51,6 +51,12 @@ body {
   align-items: flex-end;
 }
 
+.hud-right-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .hud-label {
   font-size: 11px;
   letter-spacing: 0.08em;

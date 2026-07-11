@@ -45,6 +45,7 @@ describe('spawnEnemy', () => {
     expect(e.radius).toBe(ENEMY_TYPES.tanky.radius)
     expect(e.damage).toBe(ENEMY_TYPES.tanky.damage)
     expect(e.color).toBe(ENEMY_TYPES.tanky.color)
+    expect(e.coinValue).toBe(ENEMY_TYPES.tanky.coinValue)
   })
 })
 

@@ -26,6 +26,7 @@ export function createGame(width, height) {
     wave: createWaveState(),
     fireTimer: 0,
     kills: 0,
+    coins: 0,
     time: 0,
     gameOver: false,
   }

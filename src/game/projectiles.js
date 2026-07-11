@@ -41,6 +41,7 @@ export function updateProjectiles(state, dt, rng = Math.random) {
   for (const e of state.enemies) {
     if (e.hp <= 0) {
       state.kills++
+      state.coins += e.coinValue ?? 0
       spawnDeathBurst(state, e.x, e.y, e.color, rng)
     } else {
       alive.push(e)

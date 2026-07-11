@@ -33,6 +33,22 @@ describe('updateProjectiles', () => {
     expect(state.particles[0].color).toBe('#00ff00')
   })
 
+  it('abate rende moedas conforme o coinValue do inimigo', () => {
+    const state = createGame(800, 600)
+    state.enemies.push({ x: 50, y: 0, vx: 0, vy: 0, radius: 12, hp: 5, maxHp: 20, color: '#00ff00', coinValue: 7 })
+    state.projectiles.push({ x: 0, y: 0, vx: 100, vy: 0, radius: 4, damage: 10 })
+    updateProjectiles(state, 0.4, seededRng(3))
+    expect(state.coins).toBe(7)
+  })
+
+  it('abate de inimigo sem coinValue não quebra e não soma moedas', () => {
+    const state = createGame(800, 600)
+    state.enemies.push({ x: 50, y: 0, vx: 0, vy: 0, radius: 12, hp: 5, maxHp: 20, color: '#00ff00' })
+    state.projectiles.push({ x: 0, y: 0, vx: 100, vy: 0, radius: 4, damage: 10 })
+    updateProjectiles(state, 0.4, seededRng(3))
+    expect(state.coins).toBe(0)
+  })
+
   it('remove projéteis que saem da tela sem acertar nada', () => {
     const state = createGame(800, 600)
     state.projectiles.push({ x: 790, y: 0, vx: 500, vy: 0, radius: 4, damage: 10 })

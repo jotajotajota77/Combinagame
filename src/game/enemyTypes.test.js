@@ -12,6 +12,16 @@ describe('ENEMY_TYPES', () => {
     expect(ENEMY_TYPES.tanky.hp).toBeGreaterThan(ENEMY_TYPES.normal.hp)
     expect(ENEMY_TYPES.tanky.speed).toBeLessThan(ENEMY_TYPES.normal.speed)
   })
+
+  it('todo tipo tem uma recompensa em moedas positiva', () => {
+    for (const type of Object.values(ENEMY_TYPES)) {
+      expect(type.coinValue).toBeGreaterThan(0)
+    }
+  })
+
+  it('tanque (mais difícil de matar) rende mais moedas que o normal', () => {
+    expect(ENEMY_TYPES.tanky.coinValue).toBeGreaterThan(ENEMY_TYPES.normal.coinValue)
+  })
 })
 
 describe('pickEnemyType', () => {
