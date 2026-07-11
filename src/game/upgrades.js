@@ -8,7 +8,7 @@ export const UPGRADE_STEP = {
 
 export const UPGRADE_LIMITS = {
   damage: { min: 5, max: 60 },
-  fireInterval: { min: 0.12, max: 1.2 },
+  fireInterval: { min: 0.05, max: 1.2 }, // 0.05s = 20 tiros/s, o teto pedido
   range: { min: 120, max: 700 },
 }
 
