@@ -10,7 +10,6 @@ permissions:
   pages: write
   id-token: write
 
-# Permite um único deploy concorrente.
 concurrency:
   group: pages
   cancel-in-progress: true

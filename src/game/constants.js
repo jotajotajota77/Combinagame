@@ -1,30 +1,18 @@
-// Dimensões do tabuleiro e paleta de cores das gemas comuns.
-export const ROWS = 8
-export const COLS = 8
+// Todos os números que definem o "feel" do jogo — ajuste aqui.
+export const CORE_RADIUS = 26
+export const CORE_MAX_HP = 100
 
-// Paleta máxima disponível (formas/cores 0..7). O jogador escolhe quantas usar.
-export const MIN_COLORS = 2
-export const MAX_COLORS = 8
-export const NCOLORS = MAX_COLORS
+export const ARENA_MARGIN = 40 // distância mínima do spawn até a borda da tela
 
-// Número de cores em uso na partida atual (configurável pelo jogador, 2..8).
-export const config = { numColors: 6 }
-export function setNumColors(n) {
-  config.numColors = Math.max(MIN_COLORS, Math.min(MAX_COLORS, n | 0))
-  return config.numColors
-}
+export const ENEMY_RADIUS = 12
+export const ENEMY_HP = 20
+export const ENEMY_SPEED = 60 // px/s
+export const ENEMY_DAMAGE = 10 // dano ao núcleo ao chegar perto
+export const ENEMY_SPAWN_INTERVAL = 1.4 // segundos entre spawns
 
-// Cor sentinela para a bomba de cor (gema 4): nunca participa de matches comuns.
-export const BOMB_COLOR = -1
+export const TURRET_RANGE = 320 // alcance de detecção do núcleo
+export const TURRET_FIRE_INTERVAL = 0.45 // segundos entre disparos
+export const TURRET_DAMAGE = 10
 
-// Tipos de gema especial. Numeração do usuário entre parênteses.
-export const SPECIAL = {
-  FISH: 'fish', // gema 1 — quadrado 2x2
-  STRIPED: 'striped', // gema 2 — 4 em linha
-  WRAPPED: 'wrapped', // gema 3 — T/L (5 células)
-  BOMB: 'bomb', // gema 4 — 5 em linha (cor do parceiro)
-  COCO: 'coco', // gema 5 — T com pernas (6+), converte cor
-}
-
-// Direção da listrada: limpa a linha ('row') ou a coluna ('col').
-export const DIR = { ROW: 'row', COL: 'col' }
+export const PROJECTILE_SPEED = 420 // px/s
+export const PROJECTILE_RADIUS = 4

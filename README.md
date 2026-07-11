@@ -1,47 +1,17 @@
-# 🍬 Combinagame
+# 🛡️ Core Defense
 
-Um **match-3 aconchegante e sem competição**: sem tempo, sem limite de movimentos, sem "nível
-falhou". A ideia é só ir combinando peças, criando gemas especiais e assistindo às animações
-satisfatórias — cascatas infinitas, do seu jeito e no seu ritmo.
+Uma unidade central (o núcleo) que atira automaticamente em inimigos que se aproximam de todas
+as direções. Primeira fatia do jogo — bem simples de propósito, pra ir crescendo aos poucos.
 
-## Como jogar
+## Como funciona (v0)
 
-- **Arraste numa direção** (swipe) para trocar uma peça com a vizinha — ou toque em duas peças
-  vizinhas.
-- Combine **3 ou mais** peças da mesma cor para removê-las.
-- Formas maiores criam **gemas especiais** (veja abaixo).
-- **Duplo-clique** numa gema especial para ativá-la sem precisar trocar.
-- Sem jogadas? O tabuleiro **reembaralha sozinho** — ou use o botão _Embaralhar_.
-- Escolha de **2 a 8 cores** no seletor 🎨 — cada cor tem uma **forma geométrica própria**
-  (círculo, losango, hexágono, quadrado, triângulo, pentágono, estrela, octógono), então dá pra
-  jogar reconhecendo pela forma, não só pela cor.
+- O núcleo fica parado no centro da tela, com uma barra de vida.
+- Inimigos nascem nas bordas da tela em intervalos e andam em linha reta até o núcleo.
+- O núcleo mira e atira sozinho no inimigo mais próximo dentro do alcance.
+- Um inimigo que chega perto do núcleo causa dano nele e se sacrifica no impacto.
+- Quando o núcleo perde toda a vida, é game over — dá pra reiniciar.
 
-O contador de "peças combinadas" e os _combos_ são só um agrado visual: não há meta nem derrota.
-
-## Gemas especiais
-
-| Como criar | Gema | Efeito |
-|---|---|---|
-| 4 em linha | **Listrada** | limpa a linha ou a coluna inteira |
-| Forma em **T / L** (5 peças, sem 2×2) | **Embrulhada** | explode uma área 3×3 |
-| Qualquer forma que contenha um **2×2** (e não se enquadre acima) | **Peixe** 🐟 | 2 peixes nadam em curva pela tela e só estouram o alvo (com qualquer efeito em cadeia) ao chegar |
-| **5 em linha** reta (sem ramificação) | **Bomba de cor** | dispara raios até todas as peças da cor misturada e as destrói |
-| **Linha de 5 + perna** (T com braço de 5) | **Roda de coco** | tem cor própria; lança gotas de tinta que pintam todas as peças da cor misturada com a cor dela |
-
-Quando a mesma combinação se qualifica para mais de um especial, a **bomba/roda de coco tem
-prioridade sobre o peixe** (uma linha de 5 nunca vira peixe, mesmo se também contiver um 2×2).
-
-**Toda gema especial dispara ao ser destruída** — mas **efeitos em cadeia nunca se sobrepõem**:
-se uma listrada atinge uma bomba de raspão, primeiro a listrada limpa sua linha (a bomba fica
-intacta), as peças caem e repõem, e só **depois** a bomba dispara sozinha, na rodada seguinte. A
-única exceção são os **combos por troca direta (mistura)** — listrada+listrada, bomba+bomba
-limpando o tabuleiro, bomba+especial "promovendo" toda uma cor, etc. — que seguem o Candy Crush
-clássico e continuam simultâneos, num único efeito. A bomba de cor e a roda de coco, quando
-ativadas por duplo-clique, escolhem uma **cor aleatória**. Peixe é especial: **peixe+peixe** solta
-um cardume de **5 peixes**; **peixe + qualquer outro especial** solta só **1 peixe**, que carrega
-o efeito do parceiro (ex.: peixe + listrada → o peixe nada até 1 alvo e, ao chegar, limpa a
-linha/coluna dali) — e o peixe nunca mira numa peça que já esteja marcada pra sumir na mesma
-resolução.
+Sem menus, sem upgrades, sem ondas ainda — só o núcleo, os inimigos e os tiros.
 
 ## Rodando localmente
 
@@ -52,31 +22,16 @@ npm test         # testes do motor (Vitest)
 npm run build    # build de produção em dist/
 ```
 
-## Instalar no celular (PWA)
+## Arquitetura
 
-O jogo é um **PWA instalável**: no Android/Chrome, uma **badge "📲 Instalar app"** aparece no
-próprio cabeçalho assim que o navegador libera o prompt de instalação — é só tocar nela
-(`src/pwaInstall.js` escuta o evento `beforeinstallprompt` e chama `.prompt()` nativo). No iPhone,
-Safari não suporta esse evento: use Compartilhar → _Adicionar à Tela de Início_. Ele abre em tela
-cheia, com ícone próprio, e funciona **offline** depois da primeira visita (service worker em
-`public/sw.js` + manifest em `public/manifest.webmanifest`).
+- `src/game/` — **motor puro** (sem canvas/DOM, testável): `constants` (números ajustáveis),
+  `vector` (helpers 2D), `core` (estado inicial), `enemies` (spawn + movimento), `combat` (mira e
+  disparo da torre), `projectiles` (movimento + colisão), `step` (orquestra um frame).
+- `src/render.js` — desenha o estado atual no canvas (não muta nada).
+- `src/main.js` — loop principal (`requestAnimationFrame`), redimensionamento e HUD.
+- `src/game/*.test.js` — testes do motor (Vitest).
 
 ## Deploy no GitHub Pages
 
-O jogo é 100% estático. O workflow em `.github/workflows/deploy.yml` faz **build e deploy
-automáticos** a cada push na branch `main`. Para ativar:
-
-1. No GitHub, vá em **Settings → Pages** e em _Build and deployment_ selecione **GitHub Actions**.
-2. Faça merge na `main` — o site publica em `https://<seu-usuario>.github.io/Combinagame/`.
-
-O Vite está configurado com `base: './'`, então os assets carregam corretamente no subcaminho
-do Pages sem ajustes extras.
-
-## Arquitetura
-
-- `src/game/` — **motor puro** (sem React, testável): `constants`, `board`, `matches`
-  (classificação de formas), `specials` (seleção de células), `resolve` (cascata + combos),
-  `gravity`, `moves`, `engine`. Cada movimento produz uma **timeline de passos** que a UI anima.
-- `src/` — **camada React**: `App`, `components/Board`, `components/Gem`, `components/Hud`,
-  `hooks/useGame` (consome a timeline com delays) e `styles/` (gemas e keyframes em CSS puro).
-- `src/game/*.test.js` — testes do motor (formas, especiais, combos, gravidade, reembaralhamento).
+O workflow em `.github/workflows/deploy.yml` faz build e deploy automáticos a cada push na
+branch default do repositório.

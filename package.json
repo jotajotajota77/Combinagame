@@ -1,9 +1,9 @@
 {
-  "name": "combinagame",
+  "name": "core-defense",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Um match-3 cozy: sem tempo, sem limite de movimentos. Só combinar, criar especiais e assistir às animações.",
+  "description": "Uma unidade central que atira em inimigos que se aproximam.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,12 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
     "vite": "^5.4.11",
     "vitest": "^2.1.8"
   }
