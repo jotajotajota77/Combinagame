@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { createGame } from './core.js'
 import { updateProjectiles } from './projectiles.js'
+import { seededRng } from './testUtils.js'
+import { PARTICLE_COUNT } from './constants.js'
 
 describe('updateProjectiles', () => {
   it('acerta um inimigo no caminho, aplica dano e consome o projétil', () => {
@@ -15,11 +17,20 @@ describe('updateProjectiles', () => {
 
   it('remove o inimigo e soma abate quando o hp zera', () => {
     const state = createGame(800, 600)
-    state.enemies.push({ x: 50, y: 0, vx: 0, vy: 0, radius: 12, hp: 5, maxHp: 20 })
+    state.enemies.push({ x: 50, y: 0, vx: 0, vy: 0, radius: 12, hp: 5, maxHp: 20, color: '#00ff00' })
     state.projectiles.push({ x: 0, y: 0, vx: 100, vy: 0, radius: 4, damage: 10 })
-    updateProjectiles(state, 0.4)
+    updateProjectiles(state, 0.4, seededRng(3))
     expect(state.enemies).toHaveLength(0)
     expect(state.kills).toBe(1)
+  })
+
+  it('morte do inimigo dispara uma explosão de partículas na cor dele', () => {
+    const state = createGame(800, 600)
+    state.enemies.push({ x: 50, y: 0, vx: 0, vy: 0, radius: 12, hp: 5, maxHp: 20, color: '#00ff00' })
+    state.projectiles.push({ x: 0, y: 0, vx: 100, vy: 0, radius: 4, damage: 10 })
+    updateProjectiles(state, 0.4, seededRng(3))
+    expect(state.particles).toHaveLength(PARTICLE_COUNT)
+    expect(state.particles[0].color).toBe('#00ff00')
   })
 
   it('remove projéteis que saem da tela sem acertar nada', () => {

@@ -1,3 +1,5 @@
+import { CORE_FLASH_DURATION } from './game/constants.js'
+
 // Desenho puro em canvas: recebe o estado do jogo e desenha o frame atual.
 // Não muda `state` — só lê.
 
@@ -58,6 +60,28 @@ function drawProjectile(ctx, p) {
   ctx.shadowBlur = 0
 }
 
+// Partículas somem gradualmente (alpha cai com a vida restante).
+function drawParticles(ctx, particles) {
+  for (const p of particles) {
+    const alpha = Math.max(0, p.life / p.maxLife)
+    ctx.beginPath()
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
+    ctx.globalAlpha = alpha
+    ctx.fillStyle = p.color
+    ctx.fill()
+  }
+  ctx.globalAlpha = 1
+}
+
+// Flash vermelho na tela inteira quando o núcleo toma dano — desenhado por
+// cima de tudo, mas discreto o bastante pra não atrapalhar a visão do jogo.
+function drawCoreFlash(ctx, state) {
+  if (state.core.flashTimer <= 0) return
+  const ratio = state.core.flashTimer / CORE_FLASH_DURATION
+  ctx.fillStyle = `rgba(255, 40, 60, ${ratio * 0.35})`
+  ctx.fillRect(0, 0, state.width, state.height)
+}
+
 export function render(ctx, state) {
   ctx.clearRect(0, 0, state.width, state.height)
 
@@ -67,5 +91,7 @@ export function render(ctx, state) {
   drawRange(ctx, state.core)
   for (const p of state.projectiles) drawProjectile(ctx, p)
   for (const e of state.enemies) drawEnemy(ctx, e)
+  drawParticles(ctx, state.particles)
   drawCore(ctx, state.core)
+  drawCoreFlash(ctx, state)
 }

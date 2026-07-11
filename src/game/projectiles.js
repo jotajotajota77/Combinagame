@@ -1,11 +1,13 @@
+import { spawnDeathBurst } from './particles.js'
 import { distance } from './vector.js'
 
 const OFFSCREEN_MARGIN = 40
 
 // Move os projéteis, aplica dano no primeiro inimigo que encostarem e remove
 // tanto o projétil (some no impacto) quanto inimigos cujo hp zerou. Incrementa
-// `state.kills` a cada inimigo abatido.
-export function updateProjectiles(state, dt) {
+// `state.kills` a cada inimigo abatido e dispara uma explosão de partículas na
+// morte.
+export function updateProjectiles(state, dt, rng = Math.random) {
   const aliveProjectiles = []
 
   for (const p of state.projectiles) {
@@ -37,8 +39,12 @@ export function updateProjectiles(state, dt) {
 
   const alive = []
   for (const e of state.enemies) {
-    if (e.hp <= 0) state.kills++
-    else alive.push(e)
+    if (e.hp <= 0) {
+      state.kills++
+      spawnDeathBurst(state, e.x, e.y, e.color, rng)
+    } else {
+      alive.push(e)
+    }
   }
   state.enemies = alive
 }

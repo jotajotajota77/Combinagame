@@ -1,6 +1,13 @@
 // Todos os números que definem o "feel" do jogo — ajuste aqui.
 export const CORE_RADIUS = 26
 export const CORE_MAX_HP = 100
+export const CORE_FLASH_DURATION = 0.25 // segundos que a tela pisca ao levar dano
+
+export const PARTICLE_COUNT = 8 // partículas por explosão de morte
+export const PARTICLE_SPEED_MIN = 60
+export const PARTICLE_SPEED_MAX = 160
+export const PARTICLE_LIFE = 0.4 // segundos até sumir
+export const PARTICLE_RADIUS = 3
 
 export const ARENA_MARGIN = 40 // distância mínima do spawn até a borda da tela
 

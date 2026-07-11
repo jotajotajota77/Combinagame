@@ -3,7 +3,7 @@ import { createGame } from './core.js'
 import { spawnEnemy, updateEnemies } from './enemies.js'
 import { distance } from './vector.js'
 import { seededRng } from './testUtils.js'
-import { CORE_MAX_HP } from './constants.js'
+import { CORE_FLASH_DURATION, CORE_MAX_HP, PARTICLE_COUNT } from './constants.js'
 import { ENEMY_TYPES } from './enemyTypes.js'
 
 describe('spawnEnemy', () => {
@@ -99,5 +99,32 @@ describe('updateEnemies', () => {
     e.y = state.core.y
     updateEnemies(state, 0)
     expect(state.core.hp).toBe(CORE_MAX_HP - ENEMY_TYPES.tanky.damage)
+  })
+
+  it('impacto no núcleo dispara o flash de dano e uma explosão de partículas', () => {
+    const state = createGame(800, 600)
+    state.enemies.push({
+      x: state.core.x,
+      y: state.core.y,
+      vx: 0,
+      vy: 0,
+      radius: 12,
+      hp: 20,
+      maxHp: 20,
+      damage: 10,
+      color: '#ff0000',
+    })
+    updateEnemies(state, 0, seededRng(1))
+    expect(state.core.flashTimer).toBe(CORE_FLASH_DURATION)
+    expect(state.particles).toHaveLength(PARTICLE_COUNT)
+  })
+
+  it('o flash de dano decai com o tempo até chegar a zero', () => {
+    const state = createGame(800, 600)
+    state.core.flashTimer = CORE_FLASH_DURATION
+    updateEnemies(state, CORE_FLASH_DURATION / 2)
+    expect(state.core.flashTimer).toBeCloseTo(CORE_FLASH_DURATION / 2)
+    updateEnemies(state, 10)
+    expect(state.core.flashTimer).toBe(0)
   })
 })

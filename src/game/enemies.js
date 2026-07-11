@@ -1,4 +1,6 @@
+import { CORE_FLASH_DURATION } from './constants.js'
 import { ENEMY_TYPES } from './enemyTypes.js'
+import { spawnDeathBurst } from './particles.js'
 import { direction, distance } from './vector.js'
 
 // Escolhe um ponto aleatório no perímetro do retângulo width x height —
@@ -41,7 +43,10 @@ export function spawnEnemy(state, rng = Math.random, scale = { hp: 1, speed: 1 }
 
 // Move os inimigos e aplica dano ao núcleo quando um deles chega perto o
 // bastante — esse inimigo é consumido no impacto (não fica empurrando).
-export function updateEnemies(state, dt) {
+// Também cuida do flash de dano na tela (decai a cada frame, reseta no impacto).
+export function updateEnemies(state, dt, rng = Math.random) {
+  state.core.flashTimer = Math.max(0, state.core.flashTimer - dt)
+
   const alive = []
   for (const e of state.enemies) {
     e.x += e.vx * dt
@@ -49,6 +54,8 @@ export function updateEnemies(state, dt) {
     const d = distance(e.x, e.y, state.core.x, state.core.y)
     if (d <= state.core.radius + e.radius) {
       state.core.hp = Math.max(0, state.core.hp - e.damage)
+      state.core.flashTimer = CORE_FLASH_DURATION
+      spawnDeathBurst(state, e.x, e.y, e.color, rng)
       continue // inimigo se sacrifica no impacto
     }
     alive.push(e)
