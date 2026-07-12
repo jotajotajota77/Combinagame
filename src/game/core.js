@@ -1,4 +1,5 @@
 import { CORE_MAX_HP, CORE_RADIUS, TURRET_DAMAGE, TURRET_FIRE_INTERVAL, TURRET_RANGE } from './constants.js'
+import { createEffectsState } from './effects.js'
 import { createWaveState } from './waves.js'
 
 // Estado inicial de uma partida. `width`/`height` são o tamanho da arena (px);
@@ -28,6 +29,7 @@ export function createGame(width, height) {
     kills: 0,
     coins: 0,
     shop: { hpUpgradesBought: 0 },
+    effects: createEffectsState(),
     time: 0,
     gameOver: false,
   }

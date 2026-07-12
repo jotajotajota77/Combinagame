@@ -51,10 +51,11 @@ function drawEnemy(ctx, e) {
 }
 
 function drawProjectile(ctx, p) {
+  const color = p.homing ? '#ff8a4d' : '#fff7c2'
   ctx.beginPath()
   ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
-  ctx.fillStyle = '#fff7c2'
-  ctx.shadowColor = '#ffe98a'
+  ctx.fillStyle = color
+  ctx.shadowColor = p.homing ? '#ff8a4d' : '#ffe98a'
   ctx.shadowBlur = 8
   ctx.fill()
   ctx.shadowBlur = 0

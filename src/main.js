@@ -12,6 +12,7 @@ import {
 } from './game/upgrades.js'
 import { buyHeal, buyHpUpgrade, canBuyHeal, canBuyHpUpgrade, healCost, hpUpgradeCost } from './game/shop.js'
 import { startNextWave } from './game/waves.js'
+import { EFFECTS } from './game/effects.js'
 
 const appEl = document.getElementById('app')
 const canvas = document.getElementById('game')
@@ -43,6 +44,10 @@ const hpUpgradeCostEl = document.getElementById('hp-upgrade-cost')
 const btnBuyHeal = document.getElementById('btn-buy-heal')
 const btnBuyHp = document.getElementById('btn-buy-hp')
 const btnContinue = document.getElementById('btn-continue')
+
+const btnEffectsToggle = document.getElementById('btn-effects-toggle')
+const effectsPanelEl = document.getElementById('effects-panel')
+const effectsListEl = document.getElementById('effects-list')
 
 let dpr = Math.max(1, window.devicePixelRatio || 1)
 let state = null
@@ -77,8 +82,41 @@ function resize() {
 function newGame() {
   const { w, h } = getViewportSize()
   state = createGame(w, h)
+  applyEffectsToState() // mantém os efeitos ligados no checkbox mesmo depois de reiniciar
   gameOverEl.classList.add('hidden')
   updateUpgradePanel()
+}
+
+// Uma linha com checkbox por efeito da lista — só precisa rodar uma vez, os
+// cliques mexem direto em `state.effects`.
+function buildEffectsPanel() {
+  for (const effect of EFFECTS) {
+    const label = document.createElement('label')
+    label.className = 'effect-option'
+
+    const checkbox = document.createElement('input')
+    checkbox.type = 'checkbox'
+    checkbox.id = `effect-${effect.key}`
+    checkbox.addEventListener('change', () => {
+      state.effects[effect.key] = checkbox.checked
+    })
+
+    const text = document.createElement('span')
+    text.textContent = effect.label
+
+    label.appendChild(checkbox)
+    label.appendChild(text)
+    effectsListEl.appendChild(label)
+  }
+}
+
+// Reaplica o que os checkboxes já mostram em cima do state novo (pra um
+// efeito ligado sobreviver a um reinício, já que o state em si é recriado).
+function applyEffectsToState() {
+  for (const effect of EFFECTS) {
+    const checkbox = document.getElementById(`effect-${effect.key}`)
+    if (checkbox) state.effects[effect.key] = checkbox.checked
+  }
 }
 
 // Reflete os valores atuais nos chips e desabilita o botão que já bateu no limite.
@@ -169,6 +207,12 @@ btnBuyHeal.addEventListener('click', () => buyHeal(state))
 btnBuyHp.addEventListener('click', () => buyHpUpgrade(state))
 btnContinue.addEventListener('click', () => startNextWave(state))
 
+btnEffectsToggle.addEventListener('click', () => {
+  const open = effectsPanelEl.classList.toggle('hidden') === false
+  btnEffectsToggle.classList.toggle('active', open)
+})
+
+buildEffectsPanel()
 newGame()
 resize()
 requestAnimationFrame((t) => {

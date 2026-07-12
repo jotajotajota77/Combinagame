@@ -65,3 +65,35 @@ describe('updateProjectiles', () => {
     expect(state.projectiles[0].x).toBeCloseTo(10)
   })
 })
+
+describe('mísseis teleguiados (p.homing)', () => {
+  it('reaponta pro inimigo mais próximo a cada frame, mantendo a velocidade', () => {
+    const state = createGame(800, 600)
+    // inimigo bem abaixo do míssil, mas o míssil começa mirando pra direita.
+    state.enemies.push({ x: 100, y: 200, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20 })
+    state.projectiles.push({ x: 100, y: 100, vx: 100, vy: 0, radius: 4, damage: 3, homing: true })
+
+    updateProjectiles(state, 0.001) // dt bem pequeno pra não colidir, só girar
+
+    const p = state.projectiles[0]
+    expect(p.vy).toBeGreaterThan(0) // virou pra baixo, na direção do inimigo
+    expect(Math.hypot(p.vx, p.vy)).toBeCloseTo(100) // velocidade preservada
+  })
+
+  it('não teleguia (segue reto) quando não há nenhum inimigo vivo', () => {
+    const state = createGame(800, 600)
+    state.projectiles.push({ x: 100, y: 100, vx: 100, vy: 0, radius: 4, damage: 3, homing: true })
+    updateProjectiles(state, 0.1)
+    expect(state.projectiles[0].vx).toBe(100)
+    expect(state.projectiles[0].vy).toBe(0)
+  })
+
+  it('míssil também aplica dano e soma abate normalmente ao acertar', () => {
+    const state = createGame(800, 600)
+    state.enemies.push({ x: 100, y: 100, vx: 0, vy: 0, radius: 12, hp: 3, maxHp: 20, color: '#fff' })
+    state.projectiles.push({ x: 100, y: 100, vx: 100, vy: 0, radius: 4, damage: 3, homing: true })
+    updateProjectiles(state, 0.001, seededRng(1))
+    expect(state.projectiles).toHaveLength(0)
+    expect(state.kills).toBe(1)
+  })
+})

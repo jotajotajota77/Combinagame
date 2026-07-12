@@ -13,7 +13,7 @@ export function stepGame(state, dt, rng = Math.random) {
   state.time += dt
 
   updateEnemies(state, dt, rng)
-  updateCombat(state, dt)
+  updateCombat(state, dt, rng)
   updateProjectiles(state, dt, rng)
   updateWaves(state, dt, rng)
   updateParticles(state, dt)

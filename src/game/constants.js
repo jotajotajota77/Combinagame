@@ -20,6 +20,13 @@ export const TURRET_DAMAGE = 10
 export const PROJECTILE_SPEED = 420 // px/s
 export const PROJECTILE_RADIUS = 4
 
+// Efeito "míssil" (testável via botão Efeitos): substitui o tiro normal por
+// vários mísseis mais fracos e teleguiados nascendo ao redor do núcleo.
+export const MISSILE_COUNT = 4
+export const MISSILE_DAMAGE_RATIO = 0.35 // fração do dano de um tiro normal, por míssil
+export const MISSILE_SPAWN_RADIUS = 40 // distância do centro do núcleo onde cada míssil nasce
+export const MISSILE_SPEED = 300 // px/s — mais lento que o tiro reto, pra dar pra ver a curva
+
 // Loja entre ondas: gasta moedas em melhorias permanentes/consumíveis do
 // núcleo. Só fica disponível durante o descanso (wave.phase === 'resting').
 export const SHOP_HEAL_COST = 15 // custo fixo — é consumível, não escala

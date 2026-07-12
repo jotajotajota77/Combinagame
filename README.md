@@ -26,9 +26,14 @@ as direções. Primeira fatia do jogo — bem simples de propósito, pra ir cres
   (+HP máximo permanente, fica mais caro a cada compra) — mais um botão **Continuar** pra retomar
   quando o jogador quiser, sem pressa. Os botões de compra desabilitam sozinhos quando faltam
   moedas ou não há o que curar.
+- Um botão **Efeitos** no rodapé abre um painel de checkboxes pra ligar/desligar efeitos especiais
+  em teste. O primeiro é o **míssil**: em vez de um tiro reto só, saem 4 mísseis mais fracos (35%
+  do dano de um tiro normal cada) de pontos aleatórios ao redor do núcleo, cada um perseguindo o
+  inimigo mais próximo de si mesmo (não necessariamente o mesmo alvo dos outros). Mísseis aparecem
+  em laranja pra diferenciar do tiro normal.
 
 Sem menu inicial, sem som ainda — só o núcleo, os inimigos, os tiros, as ondas, os ajustes manuais
-de torre, as moedas por abate e a loja entre ondas.
+de torre, as moedas por abate, a loja entre ondas e os efeitos especiais em teste.
 
 ## Rodando localmente
 
@@ -48,7 +53,8 @@ npm run build    # build de produção em dist/
   abate), `waves` (progressão de ondas/dificuldade e sorteio de tipo), `upgrades` (ajusta
   ataque/cadência/alcance do núcleo, com limites), `particles` (explosão de partículas na morte de
   inimigos/dano no núcleo), `shop` (compras entre ondas com as moedas: reparar/reforçar o
-  núcleo), `step` (orquestra um frame).
+  núcleo), `effects` (lista de efeitos especiais testáveis via checkbox, ex: míssil), `step`
+  (orquestra um frame).
 - `src/render.js` — desenha o estado atual no canvas (não muta nada).
 - `src/main.js` — loop principal (`requestAnimationFrame`), redimensionamento e HUD.
 - `src/game/*.test.js` — testes do motor (Vitest).
