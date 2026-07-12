@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { distance, direction } from './vector.js'
+import { distance, direction, normalizeAngle } from './vector.js'
 
 describe('distance', () => {
   it('calcula a distância euclidiana', () => {
@@ -18,5 +18,20 @@ describe('direction', () => {
 
   it('devolve {0,0} quando os pontos coincidem', () => {
     expect(direction(5, 5, 5, 5)).toEqual({ x: 0, y: 0 })
+  })
+})
+
+describe('normalizeAngle', () => {
+  it('mantém ângulos já dentro de (-PI, PI]', () => {
+    expect(normalizeAngle(1)).toBeCloseTo(1)
+    expect(normalizeAngle(-1)).toBeCloseTo(-1)
+  })
+
+  it('traz ângulos maiores que PI de volta pro intervalo', () => {
+    expect(normalizeAngle(Math.PI * 1.5)).toBeCloseTo(-Math.PI * 0.5)
+  })
+
+  it('traz ângulos menores que -PI de volta pro intervalo', () => {
+    expect(normalizeAngle(-Math.PI * 1.5)).toBeCloseTo(Math.PI * 0.5)
   })
 })

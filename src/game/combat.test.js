@@ -1,7 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import { createGame } from './core.js'
-import { findNearestEnemy, updateCombat } from './combat.js'
-import { MISSILE_COUNT, MISSILE_DAMAGE_RATIO, MISSILE_SPAWN_RADIUS, TURRET_RANGE, TURRET_FIRE_INTERVAL } from './constants.js'
+import { findNearestEnemy, findNearestVisibleEnemy, updateCombat } from './combat.js'
+import {
+  MISSILE_COUNT,
+  MISSILE_DAMAGE_RATIO,
+  MISSILE_SPAWN_RADIUS,
+  MISSILE_VIEW_RANGE,
+  TURRET_RANGE,
+  TURRET_FIRE_INTERVAL,
+} from './constants.js'
 import { distance } from './vector.js'
 import { seededRng } from './testUtils.js'
 
@@ -94,15 +101,64 @@ describe('updateCombat com o efeito míssil ligado', () => {
     expect(state.projectiles).toHaveLength(0)
   })
 
-  it('cada míssil já nasce travado no inimigo mais próximo de si (ver updateHoming)', () => {
+  it('míssil que nasce olhando pro alvo trava nele de cara', () => {
     const state = createGame(800, 600)
     state.fireTimer = 0
     state.effects.missile = true
-    const enemy = addEnemy(state, state.core.x + 100, state.core.y)
-    updateCombat(state, 0, seededRng(4))
+    const enemy = addEnemy(state, state.core.x + 100, state.core.y) // à direita do núcleo
+    const facingTargetRng = () => 0 // ângulo 0 → nasce olhando pra +x, reto pro inimigo
+
+    updateCombat(state, 0, facingTargetRng)
 
     for (const p of state.projectiles) {
-      expect(p.target).toBe(enemy) // só existe esse inimigo, então todos travam nele
+      expect(p.target).toBe(enemy)
     }
+  })
+
+  it('míssil que nasce de costas pro alvo (fora do cone de 180°) não trava nele', () => {
+    const state = createGame(800, 600)
+    state.fireTimer = 0
+    state.effects.missile = true
+    addEnemy(state, state.core.x + 100, state.core.y) // à direita do núcleo
+    const facingAwayRng = () => 0.5 // ângulo PI → nasce olhando pra -x, de costas pro inimigo
+
+    updateCombat(state, 0, facingAwayRng)
+
+    for (const p of state.projectiles) {
+      expect(p.target).toBeNull()
+    }
+  })
+})
+
+describe('findNearestVisibleEnemy', () => {
+  it('enxerga um alvo bem na frente (ângulo 0)', () => {
+    const state = createGame(800, 600)
+    const enemy = addEnemy(state, 100, 0)
+    expect(findNearestVisibleEnemy(state, 0, 0, 1, 0)).toBe(enemy)
+  })
+
+  it('enxerga um alvo bem na borda do cone (90° de um lado)', () => {
+    const state = createGame(800, 600)
+    const enemy = addEnemy(state, 0, 100) // 90° em relação ao heading (1,0)
+    expect(findNearestVisibleEnemy(state, 0, 0, 1, 0)).toBe(enemy)
+  })
+
+  it('não enxerga um alvo atrás (mais de 90° do heading)', () => {
+    const state = createGame(800, 600)
+    addEnemy(state, -100, 0) // 180° em relação ao heading (1,0) — direto atrás
+    expect(findNearestVisibleEnemy(state, 0, 0, 1, 0)).toBeNull()
+  })
+
+  it('não enxerga um alvo além do alcance de visão', () => {
+    const state = createGame(4000, 4000)
+    addEnemy(state, MISSILE_VIEW_RANGE + 100, 0)
+    expect(findNearestVisibleEnemy(state, 0, 0, 1, 0)).toBeNull()
+  })
+
+  it('entre dois alvos visíveis, escolhe o mais próximo', () => {
+    const state = createGame(800, 600)
+    const near = addEnemy(state, 50, 0)
+    addEnemy(state, 90, 0)
+    expect(findNearestVisibleEnemy(state, 0, 0, 1, 0)).toBe(near)
   })
 })

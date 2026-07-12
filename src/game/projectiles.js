@@ -1,29 +1,22 @@
-import { MISSILE_TURN_RATE } from './constants.js'
-import { findNearestEnemyTo } from './combat.js'
+import { MISSILE_TRAIL_LENGTH, MISSILE_TURN_RATE } from './constants.js'
+import { findNearestVisibleEnemy } from './combat.js'
 import { spawnDeathBurst } from './particles.js'
-import { direction, distance } from './vector.js'
+import { direction, distance, normalizeAngle } from './vector.js'
 
 const OFFSCREEN_MARGIN = 40
-
-// Normaliza um ângulo pro intervalo (-PI, PI] — precisa disso pra saber qual
-// é o menor giro entre o rumo atual e o desejado (evita girar pelo caminho
-// mais longo quando cruza a marca de ±180°).
-function normalizeAngle(angle) {
-  let a = angle % (Math.PI * 2)
-  if (a > Math.PI) a -= Math.PI * 2
-  if (a < -Math.PI) a += Math.PI * 2
-  return a
-}
 
 // Mísseis (p.homing) perseguem um alvo travado (p.target), não "o mais
 // próximo agora" recalculado do zero a cada frame — isso evita ficar
 // quicando entre dois inimigos de distância parecida. Só troca de alvo
-// quando o atual morre/sai do campo. A curva é limitada por
-// MISSILE_TURN_RATE (não é teleguiado perfeito, tem atraso pra virar); sem
-// nenhum alvo no mapa, tende a se afastar do núcleo até se perder de vista.
+// quando o atual morre/sai do campo, e mesmo assim só enxerga um novo alvo
+// dentro do próprio cone de visão (ver findNearestVisibleEnemy em
+// combat.js) — não vira instantaneamente pra mirar alguém atrás dele. A
+// curva em si é limitada por MISSILE_TURN_RATE (não é teleguiado perfeito,
+// tem atraso pra virar); sem nenhum alvo visível, tende a se afastar do
+// núcleo até se perder de vista.
 function updateHoming(p, state, dt) {
   if (!p.target || !state.enemies.includes(p.target)) {
-    p.target = findNearestEnemyTo(state, p.x, p.y)
+    p.target = findNearestVisibleEnemy(state, p.x, p.y, p.vx, p.vy)
   }
 
   const desired = p.target
@@ -42,6 +35,14 @@ function updateHoming(p, state, dt) {
   p.vy = Math.sin(newAngle) * speed
 }
 
+// Guarda um rastro curto (últimas MISSILE_TRAIL_LENGTH posições) só pra
+// desenhar atrás do míssil — puramente visual, ver drawMissileTrail em render.js.
+function updateMissileTrail(p) {
+  if (!p.trail) p.trail = []
+  p.trail.push({ x: p.x, y: p.y })
+  if (p.trail.length > MISSILE_TRAIL_LENGTH) p.trail.shift()
+}
+
 // Move os projéteis, aplica dano no primeiro inimigo que encostarem e remove
 // tanto o projétil (some no impacto) quanto inimigos cujo hp zerou. Incrementa
 // `state.kills` a cada inimigo abatido e dispara uma explosão de partículas na
@@ -50,7 +51,10 @@ export function updateProjectiles(state, dt, rng = Math.random) {
   const aliveProjectiles = []
 
   for (const p of state.projectiles) {
-    if (p.homing) updateHoming(p, state, dt)
+    if (p.homing) {
+      updateMissileTrail(p)
+      updateHoming(p, state, dt)
+    }
     p.x += p.vx * dt
     p.y += p.vy * dt
 

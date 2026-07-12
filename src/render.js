@@ -50,6 +50,23 @@ function drawEnemy(ctx, e) {
   healthBar(ctx, e.x, e.y - e.radius - 10, e.radius * 2.2, e.hp / e.maxHp, '#ff9f5a')
 }
 
+// Rastro curto atrás do míssil: segmentos entre as últimas posições
+// guardadas (p.trail), ficando mais transparentes quanto mais antigos.
+function drawMissileTrail(ctx, p) {
+  if (!p.trail || p.trail.length === 0) return
+  const points = [...p.trail, { x: p.x, y: p.y }]
+  for (let i = 0; i < points.length - 1; i++) {
+    const age = (i + 1) / points.length // 0..1, mais velho = mais apagado
+    ctx.beginPath()
+    ctx.moveTo(points[i].x, points[i].y)
+    ctx.lineTo(points[i + 1].x, points[i + 1].y)
+    ctx.strokeStyle = `rgba(255, 138, 77, ${age * 0.5})`
+    ctx.lineWidth = p.radius * 0.9
+    ctx.lineCap = 'round'
+    ctx.stroke()
+  }
+}
+
 // Míssil: um dardo orientado na direção do voo (não um círculo), pra ficar
 // claro visualmente que é um projétil diferente do tiro normal.
 function drawMissile(ctx, p) {
@@ -74,6 +91,7 @@ function drawMissile(ctx, p) {
 
 function drawProjectile(ctx, p) {
   if (p.homing) {
+    drawMissileTrail(ctx, p)
     drawMissile(ctx, p)
     return
   }

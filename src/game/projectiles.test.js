@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { createGame } from './core.js'
 import { updateProjectiles } from './projectiles.js'
 import { seededRng } from './testUtils.js'
-import { MISSILE_SPEED, MISSILE_TURN_RATE, PARTICLE_COUNT } from './constants.js'
+import { MISSILE_SPEED, MISSILE_TRAIL_LENGTH, MISSILE_TURN_RATE, PARTICLE_COUNT } from './constants.js'
 
 describe('updateProjectiles', () => {
   it('acerta um inimigo no caminho, aplica dano e consome o projétil', () => {
@@ -154,5 +154,28 @@ describe('mísseis teleguiados (p.homing)', () => {
     updateProjectiles(state, 0.001, seededRng(1))
     expect(state.projectiles).toHaveLength(0)
     expect(state.kills).toBe(1)
+  })
+})
+
+describe('rastro do míssil (p.trail)', () => {
+  it('guarda as posições recentes, até o limite de MISSILE_TRAIL_LENGTH', () => {
+    const state = createGame(800, 600)
+    const missile = { x: 0, y: 0, vx: 100, vy: 0, radius: 4, damage: 3, homing: true, target: null }
+    state.projectiles.push(missile)
+
+    for (let i = 0; i < MISSILE_TRAIL_LENGTH + 3; i++) {
+      updateProjectiles(state, 0.01)
+    }
+
+    expect(missile.trail.length).toBeLessThanOrEqual(MISSILE_TRAIL_LENGTH)
+    expect(missile.trail.length).toBeGreaterThan(0)
+  })
+
+  it('não deixa rastro em projéteis normais (não-homing)', () => {
+    const state = createGame(800, 600)
+    const shot = { x: 0, y: 0, vx: 100, vy: 0, radius: 4, damage: 3 }
+    state.projectiles.push(shot)
+    updateProjectiles(state, 0.01)
+    expect(shot.trail).toBeUndefined()
   })
 })
