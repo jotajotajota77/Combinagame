@@ -28,9 +28,12 @@ as direções. Primeira fatia do jogo — bem simples de propósito, pra ir cres
   moedas ou não há o que curar.
 - Um botão **Efeitos** no rodapé abre um painel de checkboxes pra ligar/desligar efeitos especiais
   em teste. O primeiro é o **míssil**: em vez de um tiro reto só, saem 4 mísseis mais fracos (35%
-  do dano de um tiro normal cada) de pontos aleatórios ao redor do núcleo, cada um perseguindo o
-  inimigo mais próximo de si mesmo (não necessariamente o mesmo alvo dos outros). Mísseis aparecem
-  em laranja pra diferenciar do tiro normal.
+  do dano de um tiro normal cada) de pontos aleatórios ao redor do núcleo — dardos laranjas
+  orientados na direção do voo, bem diferentes do tiro normal. Cada um trava num alvo (o inimigo
+  mais próximo de si no momento do disparo) e persegue só ele até matá-lo ou ele sumir do campo —
+  não fica recalculando "o mais próximo" a cada frame, então não quica entre dois inimigos de
+  distância parecida. A curva pra perseguir tem limite de velocidade angular (não é teleguiado
+  perfeito); sem nenhum inimigo no mapa, tende a se afastar do núcleo até se perder de vista.
 
 Sem menu inicial, sem som ainda — só o núcleo, os inimigos, os tiros, as ondas, os ajustes manuais
 de torre, as moedas por abate, a loja entre ondas e os efeitos especiais em teste.

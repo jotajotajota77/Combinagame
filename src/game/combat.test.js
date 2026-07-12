@@ -93,4 +93,16 @@ describe('updateCombat com o efeito míssil ligado', () => {
     updateCombat(state, 0.1, seededRng(3))
     expect(state.projectiles).toHaveLength(0)
   })
+
+  it('cada míssil já nasce travado no inimigo mais próximo de si (ver updateHoming)', () => {
+    const state = createGame(800, 600)
+    state.fireTimer = 0
+    state.effects.missile = true
+    const enemy = addEnemy(state, state.core.x + 100, state.core.y)
+    updateCombat(state, 0, seededRng(4))
+
+    for (const p of state.projectiles) {
+      expect(p.target).toBe(enemy) // só existe esse inimigo, então todos travam nele
+    }
+  })
 })

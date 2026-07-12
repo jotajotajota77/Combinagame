@@ -70,6 +70,7 @@ function fireMissiles(state, rng) {
       radius: PROJECTILE_RADIUS,
       damage: state.core.damage * MISSILE_DAMAGE_RATIO,
       homing: true,
+      target, // trava nesse alvo até ele morrer/sumir — ver updateHoming em projectiles.js
     })
   }
 }

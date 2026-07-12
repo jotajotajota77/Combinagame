@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { createGame } from './core.js'
 import { updateProjectiles } from './projectiles.js'
 import { seededRng } from './testUtils.js'
-import { PARTICLE_COUNT } from './constants.js'
+import { MISSILE_SPEED, MISSILE_TURN_RATE, PARTICLE_COUNT } from './constants.js'
 
 describe('updateProjectiles', () => {
   it('acerta um inimigo no caminho, aplica dano e consome o projétil', () => {
@@ -67,25 +67,84 @@ describe('updateProjectiles', () => {
 })
 
 describe('mísseis teleguiados (p.homing)', () => {
-  it('reaponta pro inimigo mais próximo a cada frame, mantendo a velocidade', () => {
+  it('vira em direção ao alvo travado, mas com um limite de velocidade angular (não instantâneo)', () => {
     const state = createGame(800, 600)
-    // inimigo bem abaixo do míssil, mas o míssil começa mirando pra direita.
-    state.enemies.push({ x: 100, y: 200, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20 })
-    state.projectiles.push({ x: 100, y: 100, vx: 100, vy: 0, radius: 4, damage: 3, homing: true })
+    const enemy = { x: 100, y: 300, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20 } // reto abaixo do míssil
+    state.enemies.push(enemy)
+    const missile = { x: 100, y: 100, vx: -MISSILE_SPEED, vy: 0, radius: 4, damage: 3, homing: true, target: enemy }
+    state.projectiles.push(missile)
 
-    updateProjectiles(state, 0.001) // dt bem pequeno pra não colidir, só girar
+    const dt = 0.01
+    updateProjectiles(state, dt)
 
-    const p = state.projectiles[0]
-    expect(p.vy).toBeGreaterThan(0) // virou pra baixo, na direção do inimigo
-    expect(Math.hypot(p.vx, p.vy)).toBeCloseTo(100) // velocidade preservada
+    const maxTurn = MISSILE_TURN_RATE * dt
+    const expectedAngle = Math.PI - maxTurn // vindo de 180°, girando o máximo permitido rumo aos 90° (alvo abaixo)
+    expect(Math.atan2(missile.vy, missile.vx)).toBeCloseTo(expectedAngle, 4)
+    expect(Math.hypot(missile.vx, missile.vy)).toBeCloseTo(MISSILE_SPEED, 1) // velocidade preservada
   })
 
-  it('não teleguia (segue reto) quando não há nenhum inimigo vivo', () => {
+  it('depois de tempo suficiente, alinha totalmente com o alvo travado', () => {
     const state = createGame(800, 600)
-    state.projectiles.push({ x: 100, y: 100, vx: 100, vy: 0, radius: 4, damage: 3, homing: true })
-    updateProjectiles(state, 0.1)
-    expect(state.projectiles[0].vx).toBe(100)
-    expect(state.projectiles[0].vy).toBe(0)
+    const enemy = { x: 100, y: 300, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20 }
+    state.enemies.push(enemy)
+    const missile = { x: 100, y: 250, vx: -MISSILE_SPEED, vy: 0, radius: 4, damage: 3, homing: true, target: enemy }
+    state.projectiles.push(missile)
+
+    updateProjectiles(state, 1) // MISSILE_TURN_RATE * 1s é bem mais que meia-volta — dá pra alinhar total
+
+    expect(missile.vx).toBeCloseTo(0, 1)
+    expect(missile.vy).toBeCloseTo(MISSILE_SPEED, 0)
+  })
+
+  it('sem nenhum alvo no mapa, tende a se afastar do núcleo até se perder', () => {
+    const state = createGame(800, 600)
+    const missile = {
+      x: state.core.x + 50,
+      y: state.core.y,
+      vx: 0,
+      vy: -MISSILE_SPEED,
+      radius: 4,
+      damage: 3,
+      homing: true,
+      target: null,
+    }
+    state.projectiles.push(missile)
+
+    updateProjectiles(state, 1) // tempo suficiente pra completar o giro
+
+    // "se afastar do núcleo" == apontar no sentido núcleo→míssil (aqui, direto pra direita).
+    expect(missile.vx).toBeCloseTo(MISSILE_SPEED, 0)
+    expect(missile.vy).toBeCloseTo(0, 1)
+  })
+
+  it('quando o alvo travado morre/some, troca pro mais próximo — mas ainda vira aos poucos, sem teleportar direção', () => {
+    const state = createGame(800, 600)
+    const deadTarget = { x: 100, y: 100, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20 } // não está em state.enemies
+    const newTarget = { x: 100, y: 300, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20 }
+    state.enemies.push(newTarget)
+    const missile = { x: 100, y: 200, vx: MISSILE_SPEED, vy: 0, radius: 4, damage: 3, homing: true, target: deadTarget }
+    state.projectiles.push(missile)
+
+    const dt = 0.01
+    updateProjectiles(state, dt)
+
+    expect(missile.target).toBe(newTarget)
+    const maxTurn = MISSILE_TURN_RATE * dt
+    expect(missile.vx).toBeCloseTo(Math.cos(maxTurn) * MISSILE_SPEED, 4)
+    expect(missile.vy).toBeCloseTo(Math.sin(maxTurn) * MISSILE_SPEED, 4)
+  })
+
+  it('não troca de alvo só porque outro ficou mais perto — só troca quando o atual morre/some (evita quicar)', () => {
+    const state = createGame(800, 600)
+    const original = { x: 100, y: 300, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20 }
+    const closer = { x: 100, y: 110, vx: 0, vy: 0, radius: 12, hp: 20, maxHp: 20 } // bem mais perto do míssil
+    state.enemies.push(original, closer)
+    const missile = { x: 100, y: 100, vx: MISSILE_SPEED, vy: 0, radius: 4, damage: 3, homing: true, target: original }
+    state.projectiles.push(missile)
+
+    updateProjectiles(state, 0.01)
+
+    expect(missile.target).toBe(original) // continua travado no alvo original
   })
 
   it('míssil também aplica dano e soma abate normalmente ao acertar', () => {

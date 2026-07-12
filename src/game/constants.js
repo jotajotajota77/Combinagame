@@ -26,6 +26,7 @@ export const MISSILE_COUNT = 4
 export const MISSILE_DAMAGE_RATIO = 0.35 // fração do dano de um tiro normal, por míssil
 export const MISSILE_SPAWN_RADIUS = 40 // distância do centro do núcleo onde cada míssil nasce
 export const MISSILE_SPEED = 300 // px/s — mais lento que o tiro reto, pra dar pra ver a curva
+export const MISSILE_TURN_RATE = Math.PI * 1.5 // rad/s — vira rápido, mas não é teleguiado perfeito/instantâneo
 
 // Loja entre ondas: gasta moedas em melhorias permanentes/consumíveis do
 // núcleo. Só fica disponível durante o descanso (wave.phase === 'resting').

@@ -50,12 +50,37 @@ function drawEnemy(ctx, e) {
   healthBar(ctx, e.x, e.y - e.radius - 10, e.radius * 2.2, e.hp / e.maxHp, '#ff9f5a')
 }
 
+// Míssil: um dardo orientado na direção do voo (não um círculo), pra ficar
+// claro visualmente que é um projétil diferente do tiro normal.
+function drawMissile(ctx, p) {
+  const angle = Math.atan2(p.vy, p.vx)
+  const length = p.radius * 2.6
+  const width = p.radius * 1.4
+  ctx.save()
+  ctx.translate(p.x, p.y)
+  ctx.rotate(angle)
+  ctx.beginPath()
+  ctx.moveTo(length * 0.6, 0)
+  ctx.lineTo(-length * 0.4, width * 0.5)
+  ctx.lineTo(-length * 0.4, -width * 0.5)
+  ctx.closePath()
+  ctx.fillStyle = '#ff8a4d'
+  ctx.shadowColor = '#ff8a4d'
+  ctx.shadowBlur = 8
+  ctx.fill()
+  ctx.shadowBlur = 0
+  ctx.restore()
+}
+
 function drawProjectile(ctx, p) {
-  const color = p.homing ? '#ff8a4d' : '#fff7c2'
+  if (p.homing) {
+    drawMissile(ctx, p)
+    return
+  }
   ctx.beginPath()
   ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
-  ctx.fillStyle = color
-  ctx.shadowColor = p.homing ? '#ff8a4d' : '#ffe98a'
+  ctx.fillStyle = '#fff7c2'
+  ctx.shadowColor = '#ffe98a'
   ctx.shadowBlur = 8
   ctx.fill()
   ctx.shadowBlur = 0
