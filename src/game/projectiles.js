@@ -8,15 +8,15 @@ const OFFSCREEN_MARGIN = 40
 // Mísseis (p.homing) perseguem um alvo travado (p.target), não "o mais
 // próximo agora" recalculado do zero a cada frame — isso evita ficar
 // quicando entre dois inimigos de distância parecida. Só troca de alvo
-// quando o atual morre/sai do campo, e mesmo assim só enxerga um novo alvo
-// dentro do próprio cone de visão (ver findNearestVisibleEnemy em
-// combat.js) — não vira instantaneamente pra mirar alguém atrás dele. A
-// curva em si é limitada por MISSILE_TURN_RATE (não é teleguiado perfeito,
-// tem atraso pra virar); sem nenhum alvo visível, tende a se afastar do
-// núcleo até se perder de vista.
-function updateHoming(p, state, dt) {
+// quando o atual morre/sai do campo, e mesmo assim só entre os visíveis no
+// próprio cone (ver findNearestVisibleEnemy em combat.js), sorteado com viés
+// pro mais próximo (não é sempre determinístico) — não vira instantaneamente
+// pra mirar alguém atrás dele. A curva em si é limitada por MISSILE_TURN_RATE
+// (não é teleguiado perfeito, tem atraso pra virar); sem nenhum alvo
+// visível, tende a se afastar do núcleo até se perder de vista.
+function updateHoming(p, state, dt, rng) {
   if (!p.target || !state.enemies.includes(p.target)) {
-    p.target = findNearestVisibleEnemy(state, p.x, p.y, p.vx, p.vy)
+    p.target = findNearestVisibleEnemy(state, p.x, p.y, p.vx, p.vy, rng)
   }
 
   const desired = p.target
@@ -53,7 +53,7 @@ export function updateProjectiles(state, dt, rng = Math.random) {
   for (const p of state.projectiles) {
     if (p.homing) {
       updateMissileTrail(p)
-      updateHoming(p, state, dt)
+      updateHoming(p, state, dt, rng)
     }
     p.x += p.vx * dt
     p.y += p.vy * dt

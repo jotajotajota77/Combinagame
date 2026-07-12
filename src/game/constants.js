@@ -30,6 +30,7 @@ export const MISSILE_TURN_RATE = Math.PI * 1.5 // rad/s — vira rápido, mas n�
 export const MISSILE_TRAIL_LENGTH = 6 // pontos guardados pro rastro curto atrás do míssil
 export const MISSILE_VIEW_ANGLE = Math.PI // campo de visão de 180°, centrado na direção do voo
 export const MISSILE_VIEW_RANGE = 2000 // "bem longo" — maior que qualquer diagonal de tela plausível
+export const MISSILE_TARGET_WEIGHT_BIAS = 1 // px somado à distância antes de inverter o peso (evita peso infinito a distância 0)
 
 // Loja entre ondas: gasta moedas em melhorias permanentes/consumíveis do
 // núcleo. Só fica disponível durante o descanso (wave.phase === 'resting').

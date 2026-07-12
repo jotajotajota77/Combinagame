@@ -155,10 +155,52 @@ describe('findNearestVisibleEnemy', () => {
     expect(findNearestVisibleEnemy(state, 0, 0, 1, 0)).toBeNull()
   })
 
-  it('entre dois alvos visíveis, escolhe o mais próximo', () => {
+  it('com um único candidato visível, não consome o rng (escolha direta)', () => {
+    const state = createGame(800, 600)
+    const enemy = addEnemy(state, 100, 0)
+    const explodingRng = () => {
+      throw new Error('não devia ter sorteado nada com um candidato só')
+    }
+    expect(findNearestVisibleEnemy(state, 0, 0, 1, 0, explodingRng)).toBe(enemy)
+  })
+
+  it('entre dois alvos visíveis, escolhe o mais próximo quando o sorteio cai no início do peso', () => {
     const state = createGame(800, 600)
     const near = addEnemy(state, 50, 0)
     addEnemy(state, 90, 0)
-    expect(findNearestVisibleEnemy(state, 0, 0, 1, 0)).toBe(near)
+    expect(findNearestVisibleEnemy(state, 0, 0, 1, 0, () => 0)).toBe(near)
+  })
+
+  it('entre dois alvos visíveis, pode escolher o mais distante quando o sorteio cai no fim do peso', () => {
+    const state = createGame(800, 600)
+    addEnemy(state, 50, 0)
+    const far = addEnemy(state, 90, 0)
+    expect(findNearestVisibleEnemy(state, 0, 0, 1, 0, () => 0.999999)).toBe(far)
+  })
+
+  it('ao longo de muitas tentativas, o mais próximo é sorteado com mais frequência, mas o mais distante também tem chance', () => {
+    const state = createGame(800, 600)
+    const near = addEnemy(state, 50, 0)
+    const far = addEnemy(state, 400, 0)
+    const rng = seededRng(7)
+    let nearCount = 0
+    let farCount = 0
+    for (let i = 0; i < 500; i++) {
+      const picked = findNearestVisibleEnemy(state, 0, 0, 1, 0, rng)
+      if (picked === near) nearCount++
+      else if (picked === far) farCount++
+    }
+    expect(nearCount + farCount).toBe(500)
+    expect(nearCount).toBeGreaterThan(farCount) // tendência pro mais próximo...
+    expect(farCount).toBeGreaterThan(0) // ...mas o mais distante também é sorteado às vezes
+  })
+
+  it('ignora candidatos fora do cone/alcance na hora de sortear', () => {
+    const state = createGame(800, 600)
+    const visible = addEnemy(state, 50, 0)
+    addEnemy(state, -100, 0) // atrás, fora do cone de 180°
+    for (let seed = 1; seed <= 20; seed++) {
+      expect(findNearestVisibleEnemy(state, 0, 0, 1, 0, seededRng(seed))).toBe(visible)
+    }
   })
 })
