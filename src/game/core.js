@@ -24,6 +24,8 @@ export function createGame(width, height) {
     enemies: [],
     projectiles: [],
     particles: [],
+    lightningBolts: [],
+    fireBursts: [],
     wave: createWaveState(),
     fireTimer: 0,
     kills: 0,

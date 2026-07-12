@@ -2,6 +2,7 @@ import { updateEnemies } from './enemies.js'
 import { updateCombat } from './combat.js'
 import { updateProjectiles } from './projectiles.js'
 import { updateParticles } from './particles.js'
+import { tickStatusEffects } from './statusEffects.js'
 import { updateWaves } from './waves.js'
 
 // Avança o jogo em `dt` segundos. Muta `state` in-place (é chamado a cada
@@ -14,6 +15,7 @@ export function stepGame(state, dt, rng = Math.random) {
 
   updateEnemies(state, dt, rng)
   updateCombat(state, dt, rng)
+  tickStatusEffects(state, dt) // tique do veneno/lentidão antes da varredura de mortos em updateProjectiles
   updateProjectiles(state, dt, rng)
   updateWaves(state, dt, rng)
   updateParticles(state, dt)

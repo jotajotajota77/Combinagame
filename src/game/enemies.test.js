@@ -3,7 +3,7 @@ import { createGame } from './core.js'
 import { spawnEnemy, updateEnemies } from './enemies.js'
 import { distance } from './vector.js'
 import { seededRng } from './testUtils.js'
-import { CORE_FLASH_DURATION, CORE_MAX_HP, PARTICLE_COUNT } from './constants.js'
+import { CORE_FLASH_DURATION, CORE_MAX_HP, ICE_SLOW_FACTOR, PARTICLE_COUNT } from './constants.js'
 import { ENEMY_TYPES } from './enemyTypes.js'
 
 describe('spawnEnemy', () => {
@@ -127,5 +127,15 @@ describe('updateEnemies', () => {
     expect(state.core.flashTimer).toBeCloseTo(CORE_FLASH_DURATION / 2)
     updateEnemies(state, 10)
     expect(state.core.flashTimer).toBe(0)
+  })
+
+  it('um inimigo com slowTimer ativo (efeito gelo) se move mais devagar', () => {
+    const state = createGame(800, 600)
+    const slowed = { x: 0, y: 0, vx: 100, vy: 0, radius: 12, hp: 20, maxHp: 20, damage: 10, slowTimer: 1 }
+    const normal = { x: 0, y: 0, vx: 100, vy: 0, radius: 12, hp: 20, maxHp: 20, damage: 10, slowTimer: 0 }
+    state.enemies.push(slowed, normal)
+    updateEnemies(state, 1)
+    expect(slowed.x).toBeCloseTo(100 * ICE_SLOW_FACTOR)
+    expect(normal.x).toBeCloseTo(100)
   })
 })

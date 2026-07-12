@@ -1,4 +1,4 @@
-import { CORE_FLASH_DURATION } from './constants.js'
+import { CORE_FLASH_DURATION, ICE_SLOW_FACTOR } from './constants.js'
 import { ENEMY_TYPES } from './enemyTypes.js'
 import { spawnDeathBurst } from './particles.js'
 import { direction, distance } from './vector.js'
@@ -39,19 +39,24 @@ export function spawnEnemy(state, rng = Math.random, scale = { hp: 1, speed: 1 }
     color: type.color,
     type: typeKey,
     coinValue: type.coinValue,
+    slowTimer: 0,
+    poisonTimer: 0,
   })
 }
 
 // Move os inimigos e aplica dano ao núcleo quando um deles chega perto o
 // bastante — esse inimigo é consumido no impacto (não fica empurrando).
-// Também cuida do flash de dano na tela (decai a cada frame, reseta no impacto).
+// Também cuida do flash de dano na tela (decai a cada frame, reseta no
+// impacto) e da lentidão do efeito gelo (e.slowTimer, aplicado em
+// statusEffects.js no acerto de um projétil).
 export function updateEnemies(state, dt, rng = Math.random) {
   state.core.flashTimer = Math.max(0, state.core.flashTimer - dt)
 
   const alive = []
   for (const e of state.enemies) {
-    e.x += e.vx * dt
-    e.y += e.vy * dt
+    const speedMultiplier = e.slowTimer > 0 ? ICE_SLOW_FACTOR : 1
+    e.x += e.vx * speedMultiplier * dt
+    e.y += e.vy * speedMultiplier * dt
     const d = distance(e.x, e.y, state.core.x, state.core.y)
     if (d <= state.core.radius + e.radius) {
       state.core.hp = Math.max(0, state.core.hp - e.damage)

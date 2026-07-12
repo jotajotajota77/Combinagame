@@ -39,6 +39,12 @@ as direções. Primeira fatia do jogo — bem simples de propósito, pra ir cres
   inimigo por perto, ou se nenhum inimigo visível existir, tende a se afastar do núcleo até se
   perder de vista — a menos que a própria curva acabe virando a cabeça dele o bastante pra um
   inimigo entrar no campo de visão.
+- No mesmo painel de Efeitos, 4 **efeitos elementares** — cada um se aplica no impacto de
+  **qualquer** projétil (tiro normal ou míssil, tanto faz, e dá pra combinar vários ao mesmo
+  tempo): **raio** (salta pra até 2 inimigos próximos do que foi atingido, com um arco visual);
+  **gelo** (retarda o inimigo atingido por um tempo — anel ciano); **veneno** (dano contínuo no
+  inimigo atingido — anel verde); **fogo** (explosão em área no ponto de impacto, atingindo quem
+  estiver por perto).
 
 Sem menu inicial, sem som ainda — só o núcleo, os inimigos, os tiros, as ondas, os ajustes manuais
 de torre, as moedas por abate, a loja entre ondas e os efeitos especiais em teste.
@@ -61,8 +67,9 @@ npm run build    # build de produção em dist/
   abate), `waves` (progressão de ondas/dificuldade e sorteio de tipo), `upgrades` (ajusta
   ataque/cadência/alcance do núcleo, com limites), `particles` (explosão de partículas na morte de
   inimigos/dano no núcleo), `shop` (compras entre ondas com as moedas: reparar/reforçar o
-  núcleo), `effects` (lista de efeitos especiais testáveis via checkbox, ex: míssil), `step`
-  (orquestra um frame).
+  núcleo), `effects` (lista de efeitos especiais testáveis via checkbox: míssil, raio, gelo,
+  veneno, fogo), `statusEffects` (aplica raio/gelo/veneno/fogo no impacto de um projétil e cuida
+  do tique de dano do veneno a cada frame), `step` (orquestra um frame).
 - `src/render.js` — desenha o estado atual no canvas (não muta nada).
 - `src/main.js` — loop principal (`requestAnimationFrame`), redimensionamento e HUD.
 - `src/game/*.test.js` — testes do motor (Vitest).

@@ -2,7 +2,14 @@ import { describe, it, expect } from 'vitest'
 import { createGame } from './core.js'
 import { updateProjectiles } from './projectiles.js'
 import { seededRng } from './testUtils.js'
-import { MISSILE_SPEED, MISSILE_TRAIL_LENGTH, MISSILE_TURN_RATE, PARTICLE_COUNT } from './constants.js'
+import {
+  ICE_SLOW_DURATION,
+  LIGHTNING_CHAIN_DAMAGE_RATIO,
+  MISSILE_SPEED,
+  MISSILE_TRAIL_LENGTH,
+  MISSILE_TURN_RATE,
+  PARTICLE_COUNT,
+} from './constants.js'
 
 describe('updateProjectiles', () => {
   it('acerta um inimigo no caminho, aplica dano e consome o projétil', () => {
@@ -63,6 +70,68 @@ describe('updateProjectiles', () => {
     updateProjectiles(state, 0.1)
     expect(state.projectiles).toHaveLength(1)
     expect(state.projectiles[0].x).toBeCloseTo(10)
+  })
+})
+
+describe('efeitos elementares no impacto (tiro normal ou míssil, tanto faz)', () => {
+  it('com o efeito raio ligado, o acerto também atinge um inimigo próximo do alvo', () => {
+    const state = createGame(800, 600)
+    state.effects.lightning = true
+    state.enemies.push({ x: 50, y: 0, vx: 0, vy: 0, radius: 12, hp: 100, maxHp: 100 })
+    state.enemies.push({ x: 80, y: 0, vx: 0, vy: 0, radius: 12, hp: 100, maxHp: 100 })
+    state.projectiles.push({ x: 0, y: 0, vx: 100, vy: 0, radius: 4, damage: 20 })
+
+    updateProjectiles(state, 0.4)
+
+    expect(state.enemies[0].hp).toBe(80) // dano direto do projétil
+    expect(state.enemies[1].hp).toBe(100 - 20 * LIGHTNING_CHAIN_DAMAGE_RATIO) // salto do raio
+  })
+
+  it('com o efeito gelo ligado, o inimigo atingido fica lento', () => {
+    const state = createGame(800, 600)
+    state.effects.ice = true
+    state.enemies.push({ x: 50, y: 0, vx: 0, vy: 0, radius: 12, hp: 100, maxHp: 100, slowTimer: 0 })
+    state.projectiles.push({ x: 0, y: 0, vx: 100, vy: 0, radius: 4, damage: 10 })
+
+    updateProjectiles(state, 0.4)
+
+    expect(state.enemies[0].slowTimer).toBe(ICE_SLOW_DURATION)
+  })
+
+  it('com o efeito veneno ligado, o inimigo atingido passa a perder vida com o tempo', () => {
+    const state = createGame(800, 600)
+    state.effects.poison = true
+    state.enemies.push({ x: 50, y: 0, vx: 0, vy: 0, radius: 12, hp: 100, maxHp: 100, poisonTimer: 0 })
+    state.projectiles.push({ x: 0, y: 0, vx: 100, vy: 0, radius: 4, damage: 10 })
+
+    updateProjectiles(state, 0.4)
+
+    expect(state.enemies[0].poisonTimer).toBeGreaterThan(0)
+  })
+
+  it('com o efeito fogo ligado, o acerto causa dano de área num inimigo próximo', () => {
+    const state = createGame(800, 600)
+    state.effects.fire = true
+    state.enemies.push({ x: 50, y: 0, vx: 0, vy: 0, radius: 12, hp: 100, maxHp: 100 })
+    state.enemies.push({ x: 70, y: 0, vx: 0, vy: 0, radius: 12, hp: 100, maxHp: 100 })
+    state.projectiles.push({ x: 0, y: 0, vx: 100, vy: 0, radius: 4, damage: 10 })
+
+    updateProjectiles(state, 0.4)
+
+    expect(state.enemies[1].hp).toBeLessThan(100)
+    expect(state.fireBursts.length).toBeGreaterThan(0)
+  })
+
+  it('sem nenhum efeito elementar ligado, o acerto só afeta o próprio alvo (comportamento default)', () => {
+    const state = createGame(800, 600)
+    state.enemies.push({ x: 50, y: 0, vx: 0, vy: 0, radius: 12, hp: 100, maxHp: 100 })
+    state.enemies.push({ x: 80, y: 0, vx: 0, vy: 0, radius: 12, hp: 100, maxHp: 100 })
+    state.projectiles.push({ x: 0, y: 0, vx: 100, vy: 0, radius: 4, damage: 20 })
+
+    updateProjectiles(state, 0.4)
+
+    expect(state.enemies[0].hp).toBe(80)
+    expect(state.enemies[1].hp).toBe(100)
   })
 })
 

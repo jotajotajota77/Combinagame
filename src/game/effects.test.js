@@ -12,4 +12,9 @@ describe('createEffectsState', () => {
   it('inclui o efeito míssil', () => {
     expect(EFFECTS.some((e) => e.key === 'missile')).toBe(true)
   })
+
+  it('inclui os efeitos elementares: raio, gelo, veneno e fogo', () => {
+    const keys = EFFECTS.map((e) => e.key)
+    expect(keys).toEqual(expect.arrayContaining(['lightning', 'ice', 'poison', 'fire']))
+  })
 })

@@ -45,6 +45,28 @@ describe('stepGame', () => {
     expect(JSON.stringify(state)).toBe(before)
   })
 
+  it('um inimigo que morre de veneno no meio do frame já soma abate e moeda no mesmo frame', () => {
+    const state = createGame(800, 600)
+    state.wave.spawned = state.wave.total // trava a onda pra não nascer mais ninguém durante o teste
+    state.enemies.push({
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      radius: 12,
+      hp: 1,
+      maxHp: 20,
+      damage: 10,
+      color: '#fff',
+      coinValue: 5,
+      poisonTimer: 1,
+    })
+    stepGame(state, 1, seededRng(7)) // 1s de veneno é mais que o suficiente pra zerar 1 de hp
+    expect(state.enemies).toHaveLength(0)
+    expect(state.kills).toBe(1)
+    expect(state.coins).toBe(5)
+  })
+
   it('uma horda que sobrecarrega a torre eventualmente derruba o núcleo', () => {
     // Um inimigo por vez a torre dá conta tranquilamente (mata mais rápido do
     // que eles chegam) — então pra testar a condição de derrota de verdade,

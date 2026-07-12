@@ -1,6 +1,7 @@
 import { MISSILE_TRAIL_LENGTH, MISSILE_TURN_RATE } from './constants.js'
 import { findNearestVisibleEnemy } from './combat.js'
 import { spawnDeathBurst } from './particles.js'
+import { applyOnHitEffects } from './statusEffects.js'
 import { direction, distance, normalizeAngle } from './vector.js'
 
 const OFFSCREEN_MARGIN = 40
@@ -68,6 +69,7 @@ export function updateProjectiles(state, dt, rng = Math.random) {
 
     if (hit) {
       hit.hp -= p.damage
+      applyOnHitEffects(state, hit, p.damage) // raio/gelo/veneno/fogo, se algum estiver ligado
       continue // o projétil se consome no impacto, acerte ou não mate
     }
 

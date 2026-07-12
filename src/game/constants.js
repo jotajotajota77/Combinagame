@@ -32,6 +32,23 @@ export const MISSILE_VIEW_ANGLE = Math.PI // campo de visão de 180°, centrado 
 export const MISSILE_VIEW_RANGE = 2000 // "bem longo" — maior que qualquer diagonal de tela plausível
 export const MISSILE_TARGET_WEIGHT_BIAS = 1 // px somado à distância antes de inverter o peso (evita peso infinito a distância 0)
 
+// Efeitos elementares (testáveis via botão Efeitos): aplicados no impacto de
+// QUALQUER projétil — tiro normal ou míssil, tanto faz — ver statusEffects.js.
+export const LIGHTNING_CHAIN_COUNT = 2 // quantos inimigos extras o raio atinge, além do alvo direto
+export const LIGHTNING_CHAIN_RADIUS = 110 // px — alcance de salto a partir do inimigo atingido
+export const LIGHTNING_CHAIN_DAMAGE_RATIO = 0.6 // fração do dano do impacto original, por salto
+export const LIGHTNING_BOLT_LIFE = 0.15 // segundos que o raio fica visível na tela
+
+export const ICE_SLOW_FACTOR = 0.4 // velocidade multiplicada por isso enquanto congelado
+export const ICE_SLOW_DURATION = 2 // segundos de lentidão a cada acerto (reaplicar reinicia)
+
+export const POISON_DPS = 6 // dano por segundo enquanto envenenado
+export const POISON_DURATION = 3 // segundos de veneno a cada acerto (reaplicar reinicia)
+
+export const FIRE_SPLASH_RADIUS = 70 // px — raio da explosão no ponto de impacto
+export const FIRE_SPLASH_DAMAGE = 8 // dano fixo pros inimigos pegos na explosão (o alvo direto já levou o dano do projétil)
+export const FIRE_BURST_LIFE = 0.2 // segundos que o círculo de fogo fica visível
+
 // Loja entre ondas: gasta moedas em melhorias permanentes/consumíveis do
 // núcleo. Só fica disponível durante o descanso (wave.phase === 'resting').
 export const SHOP_HEAL_COST = 15 // custo fixo — é consumível, não escala
